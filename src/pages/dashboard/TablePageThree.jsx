@@ -1,6 +1,6 @@
 import React from "react";
 import { useGetNormalItemListsQuery } from "../../features/api/fakeStoreApi";
-import ReusableTable from "../../components/dashboard/ReusableTable";
+import ReusableTable from "../../components/reuseableComponent/ReuseableTable";
 
 const TablePageThree = () => {
   const { data } = useGetNormalItemListsQuery();

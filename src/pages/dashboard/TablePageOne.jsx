@@ -1,6 +1,6 @@
 import React from "react";
-import ReusableTable from "../../components/dashboard/ReusableTable";
 import { useGetNormalUserListsQuery } from "../../features/api/tableUserApi";
+import ReusableTable from "../../components/reuseableComponent/ReuseableTable";
 
 const TablePageOne = () => {
   const { data } = useGetNormalUserListsQuery();

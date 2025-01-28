@@ -1,6 +1,7 @@
 import React from "react";
-import ReusableTable from "../../components/dashboard/ReusableTable";
+
 import { useGetNormalMealListsQuery } from "../../features/api/mealDbApi";
+import ReusableTable from "../../components/reuseableComponent/ReuseableTable";
 
 const TablePageTwo = () => {
   const { data } = useGetNormalMealListsQuery();
