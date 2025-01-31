@@ -11,6 +11,7 @@ const TableGroup = ({
   frontend,
   currentPage: parentCurrentPage,
   setCurrentPage,
+  actions,
 }) => {
   const items = data;
   const itemsPerPage = perPage;
@@ -52,6 +53,7 @@ const TableGroup = ({
       <ReusableTable
         columns={columns}
         data={frontend ? calculatedItems : data}
+        actions={actions}
       />
       <div className="flex justify-end">
         <PaginationLayout
