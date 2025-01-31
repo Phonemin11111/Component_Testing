@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useGetNormalItemListsQuery } from "../../features/api/fakeStoreApi";
-import ReusableTable from "../../components/reuseableComponent/ReuseableTable";
+import TableGroup from "../../components/reuseableComponent/TableGroup";
 
 const TablePageThree = () => {
   const { data } = useGetNormalItemListsQuery();
@@ -16,9 +16,15 @@ const TablePageThree = () => {
   ];
 
   return (
-    <div className="p-6">
+    <div className=" flex flex-col w-full h-full gap-5">
       <h1 className="text-xl font-bold mb-4">Item Table</h1>
-      <ReusableTable columns={columns} data={currentItems} />
+      <TableGroup
+        frontend
+        columns={columns}
+        data={currentItems}
+        perPage={10}
+        dataLength={currentItems?.length}
+      />
     </div>
   );
 };
