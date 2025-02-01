@@ -96,7 +96,7 @@ const PaginationBody = ({ totalPages, currentPage, setCurrentPage }) => {
 
                 {dropdownType === page && (
                   <ul
-                    className={` absolute z-10 bg-white border border-gray-500 rounded shadow-md py-1 max-h-32 overflow-auto w-[32px] text-center`}
+                    className={`bottom-full ml-[-2px] absolute z-10 bg-white border border-gray-500 rounded shadow-md max-h-32 overflow-auto px-1.5 text-center`}
                   >
                     {getDropdownPages(page).map((dropdownPage) => (
                       <li key={dropdownPage}>
