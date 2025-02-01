@@ -37,11 +37,11 @@ const TablePageFour = () => {
 
   return (
     <div className="flex flex-col w-full h-full gap-5">
-      <h1 className="text-xl font-bold mb-4">Item Table</h1>
+      <h1 className="text-xl font-bold">Item Table</h1>
       <TableGroup
         columns={columns}
-        data={data?.results}
         actions={actions}
+        data={data?.results}
         dataLength={data?.info?.count}
         perPage={20}
         currentPage={currentPage}

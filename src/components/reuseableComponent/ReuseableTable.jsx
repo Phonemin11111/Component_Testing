@@ -11,7 +11,32 @@ const ReusableTable = ({ columns, data, actions }) => {
 
   return (
     <div>
-      <div className="overflow-auto">
+      <style>
+        {`
+          ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+          }
+          ::-webkit-scrollbar-track {
+            background: transparent;
+          }
+          ::-webkit-scrollbar-thumb {
+            background: #e5e7eb;
+            border-radius: 10px;
+          }
+          ::-webkit-scrollbar-thumb:hover {
+            background: #e5e7eb;
+          }
+          .no-scrollbar::-webkit-scrollbar {
+            display: none;
+          }
+          .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+          }
+        `}
+      </style>
+      <div className=" overflow-auto w-full">
         <table className="w-full table-auto border-collapse border border-gray-300">
           <thead className="bg-gray-100">
             <tr>

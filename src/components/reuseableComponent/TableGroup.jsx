@@ -35,12 +35,8 @@ const TableGroup = ({
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-
   const calculatedItems = items?.slice(indexOfFirstItem, indexOfLastItem);
-  console.log(calculatedItems);
-
   const totalPages = Math.ceil(dataLength / itemsPerPage);
-  console.log(totalPages);
 
   useEffect(() => {
     if (!frontend) {
@@ -55,7 +51,7 @@ const TableGroup = ({
         data={frontend ? calculatedItems : data}
         actions={actions}
       />
-      <div className="flex justify-end">
+      <div className="flex w-full xl:justify-end">
         <PaginationLayout
           totalPages={totalPages}
           currentPage={currentPage}

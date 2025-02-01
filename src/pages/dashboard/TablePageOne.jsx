@@ -15,7 +15,7 @@ const TablePageOne = () => {
   ];
 
   return (
-    <div className="p-6">
+    <div className="">
       <h1 className="text-xl font-bold mb-4">Users Table</h1>
       <ReusableTable columns={columns} data={currentItems} />
     </div>
