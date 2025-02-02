@@ -13,7 +13,7 @@ const TablePageFour = () => {
     { header: "Species", key: "species" },
     { header: "Type", key: "type" },
     { header: "Gender", key: "gender" },
-    { header: "Management", key: "actions", action: "action" },
+    { header: "Management", key: "actions", action: "actions" },
   ];
 
   const actions = [
@@ -21,13 +21,18 @@ const TablePageFour = () => {
       label: "Edit",
       onClick: (row) => handleAction(row, "edit"),
       icon: "✎",
-      className: "text-yellow-500 hover:text-yellow-700",
+      iconFlexType: "horizontal",
+      gapBetween: 4,
+      iconVariant: "text-cyan-500",
+      actionVariant: "text-yellow-500 hover:text-yellow-700",
     },
     {
       label: "Delete",
       onClick: (row) => handleAction(row, "delete"),
       icon: "✂",
-      className: "text-red-500 hover:text-red-700",
+      iconFlexType: "horizontal",
+      gapBetween: 4,
+      actionVariant: "text-red-500 hover:text-red-700",
     },
   ];
 
@@ -41,6 +46,8 @@ const TablePageFour = () => {
       <TableGroup
         columns={columns}
         actions={actions}
+        horizontalActions
+        actionsBetween={8}
         data={data?.results}
         dataLength={data?.info?.count}
         perPage={20}

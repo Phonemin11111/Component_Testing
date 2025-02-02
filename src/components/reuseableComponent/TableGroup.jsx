@@ -8,16 +8,18 @@ const TableGroup = ({
   data,
   perPage,
   dataLength,
-  frontend,
+  frontendMode,
   currentPage: parentCurrentPage,
   setCurrentPage,
   actions,
+  horizontalActions,
+  actionsBetween,
 }) => {
   const items = data;
   const itemsPerPage = perPage;
   const [searchParams, setSearchParams] = useSearchParams();
   const [currentPage, setLocalCurrentPage] = useState(
-    frontend ? 1 : parentCurrentPage
+    frontendMode ? 1 : parentCurrentPage
   );
 
   useEffect(() => {
@@ -39,19 +41,21 @@ const TableGroup = ({
   const totalPages = Math.ceil(dataLength / itemsPerPage);
 
   useEffect(() => {
-    if (!frontend) {
+    if (!frontendMode) {
       setCurrentPage(currentPage);
     }
-  }, [currentPage, setCurrentPage, frontend]);
+  }, [currentPage, setCurrentPage, frontendMode]);
 
   return (
     <div className="flex flex-col w-full h-full gap-5">
       <ReusableTable
         columns={columns}
-        data={frontend ? calculatedItems : data}
+        data={frontendMode ? calculatedItems : data}
         actions={actions}
+        horizontalActions={horizontalActions}
+        actionsBetween={actionsBetween}
       />
-      <div className="flex w-full xl:justify-end">
+      <div className="flex justify-center xl:justify-end">
         <PaginationLayout
           totalPages={totalPages}
           currentPage={currentPage}

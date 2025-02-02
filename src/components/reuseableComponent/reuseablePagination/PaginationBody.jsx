@@ -1,15 +1,33 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 const PaginationBody = ({ totalPages, currentPage, setCurrentPage }) => {
   const [dropdownType, setDropdownType] = useState(null);
+  const [position, setPosition] = useState("bottom");
+
+  const dropdownRefs = useRef({});
+  const buttonRefs = useRef({});
+
+  const handleDropdownClick = (e, page) => {
+    const buttonRect = e.target.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - buttonRect.bottom;
+    setPosition(spaceBelow >= 130 ? "bottom" : "top");
+    setDropdownType((prev) => (prev === page ? null : page));
+  };
+
   const handlePageClick = (pageNumber) => {
     setCurrentPage(pageNumber);
     setDropdownType(null);
   };
 
-  const handlePrevClick = () => setCurrentPage((prev) => Math.max(1, prev - 1));
-  const handleNextClick = () =>
+  const handlePrevClick = () => {
+    setCurrentPage((prev) => Math.max(1, prev - 1));
+    setDropdownType(null);
+  };
+
+  const handleNextClick = () => {
     setCurrentPage((prev) => Math.min(totalPages, prev + 1));
+    setDropdownType(null);
+  };
 
   const getPagination = () => {
     if (totalPages <= 5)
@@ -23,7 +41,6 @@ const PaginationBody = ({ totalPages, currentPage, setCurrentPage }) => {
         totalPages - 1,
         totalPages,
       ];
-
     return ["left", currentPage - 1, currentPage, currentPage + 1, "right"];
   };
 
@@ -56,27 +73,85 @@ const PaginationBody = ({ totalPages, currentPage, setCurrentPage }) => {
     return [];
   };
 
+  const handleClickOutside = (event) => {
+    if (!dropdownType) return;
+
+    const activeDropdown = dropdownRefs.current[dropdownType];
+    const activeButton = buttonRefs.current[dropdownType];
+
+    if (!activeDropdown || !activeButton) {
+      setDropdownType(null);
+      return;
+    }
+
+    if (
+      activeDropdown &&
+      !activeDropdown.contains(event.target) &&
+      activeButton &&
+      !activeButton.contains(event.target)
+    ) {
+      setDropdownType(null);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [dropdownType]);
+
+  useEffect(() => {
+    if (dropdownType !== null && !getPagination().includes(dropdownType)) {
+      setDropdownType(null);
+    }
+  }, [currentPage, totalPages]);
+
+  const customStyles = `
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #cefafe;
+    border-radius: 10px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #cefafe;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+`;
+
   return (
-    <div className="flex items-center gap-2 relative">
+    <div className="flex items-center gap-1 md:gap-2 relative">
+      <style>{customStyles}</style>
       <button
         onClick={handlePrevClick}
         disabled={currentPage === 1}
-        className="px-3 py-1 hover:bg-gray-100 flex items-center justify-center border border-gray-500 rounded disabled:opacity-50"
+        className="px-3 py-1 hover:bg-gray-100 text-cyan-900 flex items-center justify-center border border-cyan-500 rounded disabled:opacity-50"
         aria-label="Previous Page"
       >
         Prev
       </button>
-
-      <ul className="flex gap-2">
+      <ul className="flex gap-1 md:gap-2">
         {getPagination().map((page, index) => (
           <li key={index} className="relative">
             {typeof page === "number" ? (
               <button
                 onClick={() => handlePageClick(page)}
-                className={`w-[32px] flex justify-center items-center py-1 border border-gray-500 rounded cursor-pointer transition-all ${
+                className={`w-[32px] flex justify-center items-center py-1 border border-cyan-500 rounded cursor-pointer transition-all ${
                   page === currentPage
-                    ? "bg-blue-500 text-white"
-                    : "hover:bg-gray-100"
+                    ? "bg-cyan-500 text-white"
+                    : "hover:bg-cyan-100 text-cyan-900"
                 }`}
                 aria-label={`Page ${page}`}
               >
@@ -85,24 +160,26 @@ const PaginationBody = ({ totalPages, currentPage, setCurrentPage }) => {
             ) : (
               <div className="relative">
                 <button
-                  onClick={() =>
-                    setDropdownType(dropdownType === page ? null : page)
-                  }
+                  ref={(el) => (buttonRefs.current[page] = el)}
+                  onClick={(e) => handleDropdownClick(e, page)}
                   aria-expanded={dropdownType === page}
-                  className="w-[32px] flex justify-center items-center py-1 cursor-pointer hover:bg-gray-100 rounded-[50%]"
+                  className="px-1 md:px-0 md:w-[32px] text-cyan-500 flex justify-center items-center py-1 cursor-pointer hover:bg-cyan-100 rounded-[50%]"
                 >
                   •••
                 </button>
 
                 {dropdownType === page && (
                   <ul
-                    className={`bottom-full ml-[-2px] absolute z-10 bg-white border border-gray-500 rounded shadow-md max-h-32 overflow-auto px-1.5 text-center`}
+                    ref={(el) => (dropdownRefs.current[page] = el)}
+                    className={`left-1/2 transform -translate-x-1/2 absolute z-10 min-w-[32px] max-h-32 bg-white border border-cyan-500 rounded shadow-md overflow-auto p-0.5 text-center ${
+                      position === "top" ? "bottom-full mb-1" : "top-full mt-1"
+                    } custom-scrollbar`}
                   >
                     {getDropdownPages(page).map((dropdownPage) => (
                       <li key={dropdownPage}>
                         <button
                           onClick={() => handlePageClick(dropdownPage)}
-                          className="block w-full py-1 hover:bg-gray-200"
+                          className="block text-cyan-900 w-full p-0.5 hover:bg-cyan-200 rounded"
                         >
                           {dropdownPage}
                         </button>
@@ -115,11 +192,10 @@ const PaginationBody = ({ totalPages, currentPage, setCurrentPage }) => {
           </li>
         ))}
       </ul>
-
       <button
         onClick={handleNextClick}
         disabled={currentPage === totalPages}
-        className="px-3 py-1 flex items-center justify-center hover:bg-gray-100 border border-gray-500 rounded disabled:opacity-50"
+        className="px-3 py-1 text-cyan-900 flex items-center justify-center hover:bg-cyan-100 border border-cyan-500 rounded disabled:opacity-50"
         aria-label="Next Page"
       >
         Next

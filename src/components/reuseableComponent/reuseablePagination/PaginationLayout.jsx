@@ -3,7 +3,7 @@ import PaginationBody from "./PaginationBody";
 
 const PaginationLayout = ({ totalPages, currentPage, setCurrentPage }) => {
   return (
-    <div>
+    <div className="">
       <PaginationBody
         totalPages={totalPages}
         currentPage={currentPage}
