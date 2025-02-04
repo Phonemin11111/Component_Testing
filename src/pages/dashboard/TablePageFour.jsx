@@ -16,7 +16,13 @@ const TablePageFour = () => {
     { header: "Management", key: "actions", action: "actions" },
   ];
 
+  const footers = [
+    { footer: "Total Items", key: "id" },
+    { footer: data?.info?.count, key: "gender" },
+  ];
+
   const actions = [
+    { id: "classVariant", actionsFlexType: "horizontal", actionsBetween: 8 },
     {
       label: "Edit",
       onClick: (row) => handleAction(row, "edit"),
@@ -40,20 +46,29 @@ const TablePageFour = () => {
     console.log(actionType, "on row:", row);
   };
 
+  const merges = [
+    { type: "header", startRow: 0, startCol: 1, colSpan: 1, rowSpan: 1 },
+    { type: "body", startRow: 1, startCol: 1, rowSpan: 1, colSpan: 1 },
+    { type: "footer", startCol: 0, colSpan: 5, rowSpan: 1 },
+    { type: "footer", startCol: 5, colSpan: 2, rowSpan: 1 },
+  ];
+
+  const tableData = [
+    { key: "columns", value: columns },
+    { key: "actions", value: actions },
+    { key: "footers", value: footers },
+    { key: "data", value: data?.results },
+    { key: "dataLength", value: data?.info?.count },
+    { key: "perPage", value: 20 },
+    { key: "currentPage", value: currentPage },
+    { key: "setCurrentPage", value: setCurrentPage },
+    { key: "merges", value: merges },
+  ];
+
   return (
     <div className="flex flex-col w-full h-full gap-5">
       <h1 className="text-xl font-bold">Item Table</h1>
-      <TableGroup
-        columns={columns}
-        actions={actions}
-        horizontalActions
-        actionsBetween={8}
-        data={data?.results}
-        dataLength={data?.info?.count}
-        perPage={20}
-        currentPage={currentPage}
-        setCurrentPage={setCurrentPage}
-      />
+      <TableGroup data={tableData} />
     </div>
   );
 };

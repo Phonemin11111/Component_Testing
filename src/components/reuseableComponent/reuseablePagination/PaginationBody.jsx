@@ -107,37 +107,12 @@ const PaginationBody = ({ totalPages, currentPage, setCurrentPage }) => {
     }
   }, [currentPage, totalPages]);
 
-  const customStyles = `
-  .custom-scrollbar::-webkit-scrollbar {
-    width: 5px;
-    height: 5px;
-  }
-  .custom-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: #cefafe;
-    border-radius: 10px;
-  }
-  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: #cefafe;
-  }
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-`;
-
   return (
     <div className="flex items-center gap-1 md:gap-2 relative">
-      <style>{customStyles}</style>
       <button
         onClick={handlePrevClick}
         disabled={currentPage === 1}
-        className="px-3 py-1 hover:bg-gray-100 text-cyan-900 flex items-center justify-center border border-cyan-500 rounded disabled:opacity-50"
+        className="px-3 py-1 hover:bg-cyan-100 text-cyan-900 flex items-center justify-center border border-cyan-500 rounded disabled:opacity-50"
         aria-label="Previous Page"
       >
         Prev
@@ -171,20 +146,42 @@ const PaginationBody = ({ totalPages, currentPage, setCurrentPage }) => {
                 {dropdownType === page && (
                   <ul
                     ref={(el) => (dropdownRefs.current[page] = el)}
-                    className={`left-1/2 transform -translate-x-1/2 absolute z-10 min-w-[32px] max-h-32 bg-white border border-cyan-500 rounded shadow-md overflow-auto p-0.5 text-center ${
+                    className={` left-1/2 transform -translate-x-1/2 absolute z-10 min-w-[32px] bg-white border border-cyan-500 rounded shadow-md text-center ${
                       position === "top" ? "bottom-full mb-1" : "top-full mt-1"
-                    } custom-scrollbar`}
+                    }`}
                   >
-                    {getDropdownPages(page).map((dropdownPage) => (
-                      <li key={dropdownPage}>
+                    {page === "left" ? (
+                      <li className="bg-white border-b border-cyan-300 rounded-t p-0.5">
                         <button
-                          onClick={() => handlePageClick(dropdownPage)}
-                          className="block text-cyan-900 w-full p-0.5 hover:bg-cyan-200 rounded"
+                          onClick={() => handlePageClick(totalPages)}
+                          className="block text-cyan-500 w-full p-1 hover:bg-cyan-100 rounded-t"
                         >
-                          {dropdownPage}
+                          ⥬
                         </button>
                       </li>
-                    ))}
+                    ) : page === "right" ? (
+                      <li className="bg-white border-b border-cyan-300 rounded-t p-0.5">
+                        <button
+                          onClick={() => handlePageClick(1)}
+                          className="block text-cyan-500 w-full p-1 hover:bg-cyan-100 rounded-t"
+                        >
+                          ⥪
+                        </button>
+                      </li>
+                    ) : null}
+
+                    <div className="max-h-32 overflow-auto custom-scrollbar rounded p-0.5">
+                      {getDropdownPages(page).map((dropdownPage) => (
+                        <li key={dropdownPage}>
+                          <button
+                            onClick={() => handlePageClick(dropdownPage)}
+                            className="block text-cyan-900 w-full p-0.5 hover:bg-cyan-100 rounded"
+                          >
+                            {dropdownPage}
+                          </button>
+                        </li>
+                      ))}
+                    </div>
                   </ul>
                 )}
               </div>

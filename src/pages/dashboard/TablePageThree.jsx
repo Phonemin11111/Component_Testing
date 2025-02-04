@@ -39,17 +39,18 @@ const TablePageThree = () => {
     console.log(actionType, "on row:", row);
   };
 
+  const tableData = [
+    { key: "columns", value: columns },
+    { key: "actions", value: actions },
+    { key: "data", value: currentItems },
+    { key: "dataLength", value: currentItems?.length },
+    { key: "perPage", value: 5 },
+  ];
+
   return (
     <div className=" flex flex-col w-full h-full gap-5">
       <h1 className="text-xl font-bold mb-4">Item Table</h1>
-      <TableGroup
-        frontendMode
-        columns={columns}
-        actions={actions}
-        data={currentItems}
-        perPage={2}
-        dataLength={currentItems?.length}
-      />
+      <TableGroup data={tableData} frontendMode />
     </div>
   );
 };
