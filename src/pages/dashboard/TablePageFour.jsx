@@ -38,7 +38,7 @@ const TablePageFour = () => {
       key: "manager",
       value: [
         {
-          id: "classVariant",
+          id: "actionsVariant",
           actionsFlexType: "horizontal",
           actionsBetween: 8,
         },
