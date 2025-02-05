@@ -135,7 +135,7 @@ const PaginationBody = ({ data }) => {
         disabled={currentPage === 1}
         className={`px-3 py-1 flex items-center justify-center border rounded disabled:opacity-50 ${
           filteredColorVariant?.colorVariant
-            ? filteredColorVariant?.colorVariant
+            ? `${filteredColorVariant?.colorVariant} ${filteredColorVariant?.hoverVariant}`
             : `hover:bg-cyan-100 text-cyan-900 border-cyan-500`
         }`}
         aria-label="Previous Page"
@@ -150,13 +150,17 @@ const PaginationBody = ({ data }) => {
                 onClick={() => handlePageClick(page)}
                 className={`w-[32px] flex justify-center items-center py-1 border ${
                   filteredColorVariant?.colorVariant
-                    ? filteredColorVariant?.colorVariant
+                    ? `${filteredColorVariant?.colorVariant} ${
+                        page === currentPage
+                          ? null
+                          : filteredColorVariant?.hoverVariant
+                      }`
                     : "border-cyan-500"
                 } rounded cursor-pointer transition-all ${
                   page === currentPage
                     ? `${
                         filteredColorVariant?.activeVariant
-                          ? filteredColorVariant?.activeVariant
+                          ? `${filteredColorVariant?.activeVariant}`
                           : "bg-cyan-500 text-white"
                       }`
                     : `${
@@ -179,7 +183,7 @@ const PaginationBody = ({ data }) => {
                   aria-expanded={dropdownType === page}
                   className={`px-1 md:px-0 md:w-[32px] flex justify-center items-center py-1 cursor-pointer rounded-[50%] ${
                     filteredColorVariant?.colorVariant
-                      ? filteredColorVariant?.colorVariant
+                      ? `${filteredColorVariant?.colorVariant} ${filteredColorVariant?.hoverVariant}`
                       : "hover:bg-cyan-100 text-cyan-500"
                   }`}
                 >
@@ -189,7 +193,11 @@ const PaginationBody = ({ data }) => {
                 {dropdownType === page && (
                   <ul
                     ref={(el) => (dropdownRefs.current[page] = el)}
-                    className={` left-1/2 transform -translate-x-1/2 absolute z-10 min-w-[32px] bg-white border border-cyan-500 rounded shadow-md text-center ${
+                    className={` left-1/2 transform -translate-x-1/2 absolute z-10 min-w-[32px] border ${
+                      filteredColorVariant?.colorVariant
+                        ? `${filteredColorVariant?.colorVariant} ${filteredColorVariant?.dropdownVariant}`
+                        : "bg-white border-cyan-300"
+                    } rounded shadow-md text-center ${
                       position === "top" ? "bottom-full mb-1" : "top-full mt-1"
                     }`}
                   >
@@ -197,7 +205,7 @@ const PaginationBody = ({ data }) => {
                       <li
                         className={` border-b rounded-t p-0.5 ${
                           filteredColorVariant?.colorVariant
-                            ? filteredColorVariant?.colorVariant
+                            ? `${filteredColorVariant?.colorVariant} ${filteredColorVariant?.hoverVariant}`
                             : "bg-white border-cyan-300"
                         }`}
                       >
@@ -205,7 +213,7 @@ const PaginationBody = ({ data }) => {
                           onClick={() => handlePageClick(totalPages)}
                           className={`block w-full p-1 rounded-t ${
                             filteredColorVariant?.colorVariant
-                              ? filteredColorVariant?.colorVariant
+                              ? `${filteredColorVariant?.colorVariant} ${filteredColorVariant?.hoverVariant}`
                               : "text-cyan-500 hover:bg-cyan-100"
                           }`}
                         >
@@ -216,7 +224,7 @@ const PaginationBody = ({ data }) => {
                       <li
                         className={` border-b rounded-t p-0.5 ${
                           filteredColorVariant?.colorVariant
-                            ? filteredColorVariant?.colorVariant
+                            ? `${filteredColorVariant?.colorVariant} ${filteredColorVariant?.hoverVariant}`
                             : "bg-white border-cyan-300"
                         }`}
                       >
@@ -224,7 +232,7 @@ const PaginationBody = ({ data }) => {
                           onClick={() => handlePageClick(1)}
                           className={`block w-full p-1 rounded-t ${
                             filteredColorVariant?.colorVariant
-                              ? filteredColorVariant?.colorVariant
+                              ? `${filteredColorVariant?.colorVariant} ${filteredColorVariant?.hoverVariant}`
                               : "text-cyan-500 hover:bg-cyan-100"
                           }`}
                         >
@@ -240,7 +248,7 @@ const PaginationBody = ({ data }) => {
                             onClick={() => handlePageClick(dropdownPage)}
                             className={`block w-full p-0.5 rounded ${
                               filteredColorVariant?.colorVariant
-                                ? filteredColorVariant?.colorVariant
+                                ? `${filteredColorVariant?.colorVariant} ${filteredColorVariant?.hoverVariant}`
                                 : "text-cyan-900 hover:bg-cyan-100"
                             }`}
                           >
@@ -261,7 +269,7 @@ const PaginationBody = ({ data }) => {
         disabled={currentPage === totalPages}
         className={`px-3 py-1 flex items-center justify-center border ${
           filteredColorVariant?.colorVariant
-            ? filteredColorVariant?.colorVariant
+            ? `${filteredColorVariant?.colorVariant} ${filteredColorVariant?.hoverVariant}`
             : "hover:bg-cyan-100 text-cyan-900 border-cyan-500"
         } rounded disabled:opacity-50`}
         aria-label="Next Page"
