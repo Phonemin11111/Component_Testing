@@ -47,8 +47,10 @@ const TablePageFour = () => {
   };
 
   const merges = [
-    { type: "header", startRow: 0, startCol: 1, colSpan: 1, rowSpan: 1 },
-    { type: "body", startRow: 1, startCol: 1, rowSpan: 1, colSpan: 1 },
+    { type: "header", startCol: 1, colSpan: 1, rowSpan: 1 },
+    { type: "header", startCol: 1, colSpan: 1, rowSpan: 1 },
+    { type: "body", startRow: 1, startCol: 1, colSpan: 1, rowSpan: 1 },
+    { type: "body", startRow: 1, startCol: 1, colSpan: 1, rowSpan: 1 },
     { type: "footer", startCol: 0, colSpan: 5, rowSpan: 1 },
     { type: "footer", startCol: 5, colSpan: 2, rowSpan: 1 },
   ];

@@ -12,7 +12,6 @@ const ReuseableTable = ({ data }) => {
   const tableFooters = tableDataObject?.footers;
 
   const filteredColumns = tableColumns?.filter((col) => !col.action);
-
   const actionColumn = tableColumns?.find((col) => col.action);
 
   const footerMap = tableFooters
@@ -29,84 +28,54 @@ const ReuseableTable = ({ data }) => {
   const totalBodyRows = tableData ? tableData.length : 0;
 
   const getMergeAttributes = (rowIndex, colIndex, section = "body") => {
-    const adjustedRowIndex = rowIndex;
     if (!tableMerges) return {};
 
-    if (section === "header" || section === "footer") {
-      const mergeItem = tableMerges.find(
-        (m) =>
-          m.type === section &&
-          adjustedRowIndex >= (m.startRow || 0) &&
-          adjustedRowIndex <
-            (m.startRow || 0) + (m.rowSpan || totalBodyRows + 1) &&
-          colIndex >= m.startCol &&
-          colIndex < m.startCol + m.colSpan
-      );
-      if (mergeItem) {
-        if (
-          adjustedRowIndex === (mergeItem.startRow || 0) &&
-          colIndex === mergeItem.startCol
-        ) {
-          return {
-            colSpan: mergeItem.colSpan,
-            rowSpan: mergeItem.rowSpan || totalBodyRows + 1,
-          };
-        }
-        return null;
-      }
-    }
+    const mergeItem = tableMerges.find(
+      (m) =>
+        m.type === section &&
+        rowIndex >= (m.startRow || 0) &&
+        rowIndex < (m.startRow || 0) + (m.rowSpan || totalBodyRows + 1) &&
+        colIndex >= m.startCol &&
+        colIndex < m.startCol + m.colSpan
+    );
 
-    if (section === "body") {
-      const bodyMerge = tableMerges.find(
-        (m) =>
-          m.type === "body" &&
-          rowIndex === m.startRow &&
-          colIndex === m.startCol
-      );
-      if (bodyMerge) {
+    if (mergeItem) {
+      if (
+        rowIndex === (mergeItem.startRow || 0) &&
+        colIndex === mergeItem.startCol
+      ) {
         return {
-          rowSpan: bodyMerge.rowSpan || 1,
-          colSpan: bodyMerge.colSpan || 1,
+          colSpan: mergeItem.colSpan,
+          rowSpan: mergeItem.rowSpan || totalBodyRows + 1,
         };
       }
-
-      const coveredBody = tableMerges.find(
-        (m) =>
-          m.type === "body" &&
-          rowIndex >= m.startRow &&
-          rowIndex < m.startRow + (m.rowSpan || 1) &&
-          colIndex >= m.startCol &&
-          colIndex < m.startCol + (m.colSpan || 1)
-      );
-      if (coveredBody) return null;
+      return null;
     }
+
     return {};
   };
 
-  const isActionColumnCovered = (rowIndex) => {
-    const adjustedRowIndex = rowIndex;
+  const isActionColumnCovered = (rowIndex, section = "body") => {
     const actionColIndex = filteredColumns.length;
     if (!tableMerges) return false;
 
     return tableMerges.some((m) => {
-      const mergeStartRow = m.startRow || 0;
-      const mergeRowSpan = m.rowSpan || totalBodyRows + 1;
+      if (m.type !== section) return false;
       return (
-        adjustedRowIndex >= mergeStartRow &&
-        adjustedRowIndex < mergeStartRow + mergeRowSpan &&
+        rowIndex >= (m.startRow || 0) &&
+        rowIndex < (m.startRow || 0) + (m.rowSpan || totalBodyRows + 1) &&
         actionColIndex >= m.startCol &&
         actionColIndex < m.startCol + m.colSpan
       );
     });
   };
 
-  const actionColumnCoveredInHeader = isActionColumnCovered(0);
+  const actionColumnCoveredInHeader = isActionColumnCovered(0, "header");
 
   return (
     <div>
       <div className="overflow-auto w-full custom-scrollbar">
         <table className="w-full table-auto border-collapse border border-cyan-300">
-          {/* Header */}
           <thead className="bg-cyan-100 rounded-t-lg">
             <tr>
               {filteredColumns.map((col, colIndex) => {
@@ -136,7 +105,10 @@ const ReuseableTable = ({ data }) => {
 
           <tbody>
             {tableData?.map((row, rowIndex) => {
-              const actionColumnCoveredInBody = isActionColumnCovered(rowIndex);
+              const actionColumnCoveredInBody = isActionColumnCovered(
+                rowIndex,
+                "body"
+              );
               return (
                 <tr key={rowIndex}>
                   {filteredColumns.map((col, colIndex) => {
@@ -181,9 +153,7 @@ const ReuseableTable = ({ data }) => {
                                   ? "flex-row"
                                   : "flex-col"
                               } items-center justify-center`}
-                              style={{
-                                gap: `${action.gapBetween || 4}px`,
-                              }}
+                              style={{ gap: `${action.gapBetween || 4}px` }}
                             >
                               {action.icon && (
                                 <span className={action.iconVariant}>
@@ -202,7 +172,7 @@ const ReuseableTable = ({ data }) => {
           </tbody>
 
           {tableFooters && (
-            <tfoot className="bg-cyan-50 rounded-b-lg">
+            <tfoot className="bg-cyan-50">
               <tr>
                 {filteredColumns.map((col, colIndex) => {
                   const mergeAttrs = getMergeAttributes(0, colIndex, "footer");
@@ -217,11 +187,10 @@ const ReuseableTable = ({ data }) => {
                     </td>
                   );
                 })}
-                {actionColumn &&
-                  filteredActionsData?.length > 0 &&
-                  !isActionColumnCovered(0) && (
+                {filteredActionsData?.length > 0 &&
+                  !isActionColumnCovered(0, "footer") && (
                     <td className="px-4 py-2 text-sm font-medium text-gray-700 border border-cyan-300">
-                      {footerMap[actionColumn.key] || ""}
+                      {footerMap[actionColumn?.key] || ""}
                     </td>
                   )}
               </tr>
