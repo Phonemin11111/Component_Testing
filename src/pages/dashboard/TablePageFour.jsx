@@ -75,18 +75,18 @@ const TablePageFour = () => {
   const themeManager = [
     { key: "layoutVariant", value: [] },
     { key: "classVariant", value: [] },
-    {
-      key: "paginationVariant",
-      value: [
-        {
-          id: "colorVariant",
-          dropdownVariant: "bg-white",
-          hoverVariant: "hover:bg-yellow-100",
-          colorVariant: "text-yellow-900 border-yellow-500",
-          activeVariant: "bg-yellow-500 text-white",
-        },
-      ],
-    },
+    // {
+    //   key: "paginationVariant",
+    //   value: [
+    //     {
+    //       id: "colorVariant",
+    //       dropdownVariant: "bg-white",
+    //       hoverVariant: "hover:bg-yellow-100",
+    //       colorVariant: "text-yellow-900 border-yellow-500",
+    //       activeVariant: "bg-yellow-500 text-white",
+    //     },
+    //   ],
+    // },
   ];
 
   const merges = [
@@ -105,6 +105,7 @@ const TablePageFour = () => {
   ];
 
   const tableData = [
+    { key: "themeManager", value: themeManager },
     { key: "columns", value: columns },
     { key: "actions", value: actions },
     { key: "footers", value: footers },
@@ -114,7 +115,6 @@ const TablePageFour = () => {
     { key: "currentPage", value: currentPage },
     { key: "setCurrentPage", value: setCurrentPage },
     { key: "merges", value: merges },
-    { key: "themeManager", value: themeManager },
   ];
 
   return (

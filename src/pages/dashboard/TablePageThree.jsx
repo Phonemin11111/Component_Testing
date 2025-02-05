@@ -86,10 +86,10 @@ const TablePageThree = () => {
       value: [
         {
           id: "colorVariant",
+          dropdownVariant: "bg-white",
           hoverVariant: "hover:bg-yellow-100",
-          dropdownVariant: "bg-black",
           colorVariant: "text-yellow-900 border-yellow-500",
-          // activeVariant: "bg-yellow-500 text-white hover:bg-yellow-500",
+          activeVariant: "bg-yellow-500 text-white",
         },
       ],
     },
