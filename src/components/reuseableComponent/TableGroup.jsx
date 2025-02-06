@@ -5,10 +5,13 @@ import PaginationLayout from "./reuseablePagination/PaginationLayout";
 import "../../CyanIC.css";
 
 const TableGroup = ({ data, frontendMode }) => {
-  const tableDataArray = data;
+  const tableDataArray = Array.isArray(data) ? data : [];
   const tableData = Object.fromEntries(
-    tableDataArray.map(({ key, value }) => [key, value])
+    tableDataArray.map((item) => {
+      return [item.key, item.value];
+    })
   );
+
   const items = tableData.data;
   const itemsPerPage = tableData.perPage;
   const [searchParams, setSearchParams] = useSearchParams();
@@ -41,22 +44,31 @@ const TableGroup = ({ data, frontendMode }) => {
   }, [currentPage, tableData, frontendMode]);
 
   const gridData = [
-    { key: "columns", value: tableData.columns },
-    { key: "actions", value: tableData.actions },
-    { key: "footers", value: tableData.footers },
-    { key: "data", value: frontendMode ? calculatedItems : tableData.data },
-    { key: "merges", value: tableData.merges },
+    { key: "columns", value: tableData.columns || [] },
+    { key: "actions", value: tableData.actions || [] },
+    { key: "footers", value: tableData.footers || [] },
+    {
+      key: "data",
+      value: frontendMode ? calculatedItems || [] : tableData.data || [],
+    },
+    { key: "merges", value: tableData.merges || [] },
+  ];
+
+  const paginationData = [
+    { key: "totalPages", value: totalPages || [] },
+    { key: "currentPage", value: currentPage || [] },
+    { key: "setCurrentPage", value: setLocalCurrentPage || [] },
+    {
+      key: "paginationVariant",
+      value: tableData.themeManager || [],
+    },
   ];
 
   return (
     <div className="flex flex-col w-full h-full gap-5">
       <ReusableTable data={gridData} />
       <div className="flex justify-center xl:justify-end">
-        <PaginationLayout
-          totalPages={totalPages}
-          currentPage={currentPage}
-          setCurrentPage={setLocalCurrentPage}
-        />
+        <PaginationLayout data={paginationData} />
       </div>
     </div>
   );

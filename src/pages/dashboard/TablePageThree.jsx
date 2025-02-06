@@ -8,30 +8,69 @@ const TablePageThree = () => {
   const currentItems = data;
 
   const columns = [
-    { header: "ID", key: "id" },
-    { header: "Name", key: "title" },
-    { header: "Price", key: "price" },
-    { header: "Description", key: "description", icon: "📝" },
-    { header: "Category", key: "category" },
-    { header: "Button", key: "button", action: "actions" },
+    {
+      key: "manager",
+      value: [
+        {
+          id: "columnsVariant",
+          dataVariant:
+            "bg-yellow-100 px-3 py-1 text-left text-sm font-medium text-yellow-900 border border-yellow-300",
+          dataPosition: "item-center justify-start gap-1",
+        },
+        {
+          id: "bodyVariant",
+          dataVariant:
+            "bg-yellow-100 px-2 py-2 text-left text-sm font-medium text-yellow-900 border border-yellow-300",
+          dataPosition: "item-center justify-center",
+        },
+      ],
+    },
+    {
+      key: "data",
+      value: [
+        { header: "ID", key: "id" },
+        { header: "Name", key: "title" },
+        { header: "Price", key: "price" },
+        { header: "Description", key: "description", icon: "📝" },
+        { header: "Category", key: "category" },
+        { header: "Button", key: "button", action: "actions", icon: "📝" },
+      ],
+    },
   ];
 
   const actions = [
     {
-      label: "Edit",
-      onClick: (row) => handleAction(row, "edit"),
-      icon: "✎",
-      gapBetween: 4,
-      iconVariant: "text-cyan-500",
-      actionVariant: "text-yellow-500 hover:text-yellow-700",
+      key: "manager",
+      value: [
+        {
+          id: "actionsVariant",
+          actionsFlexType: "horizontal",
+          actionsBetween: 8,
+          dataPosition: "items-center justify-center",
+        },
+      ],
     },
     {
-      label: "Delete",
-      onClick: (row) => handleAction(row, "delete"),
-      icon: "✂",
-      gapBetween: 4,
-      iconVariant: "text-cyan-500",
-      actionVariant: "text-yellow-500 hover:text-yellow-700",
+      key: "data",
+      value: [
+        {
+          label: "Edit",
+          onClick: (row) => handleAction(row, "edit"),
+          icon: "✎",
+          iconFlexType: "vertical",
+          gapBetween: 4,
+          iconVariant: "text-yellow-500",
+          dataVariant: "text-yellow-500 hover:text-yellow-700",
+        },
+        {
+          label: "Delete",
+          onClick: (row) => handleAction(row, "delete"),
+          icon: "✂",
+          gapBetween: 4,
+          iconVariant: "text-yellow-500",
+          dataVariant: "text-yellow-500 hover:text-yellow-700",
+        },
+      ],
     },
   ];
 
@@ -39,7 +78,23 @@ const TablePageThree = () => {
     console.log(actionType, "on row:", row);
   };
 
+  const themeManager = [
+    { key: "layoutVariant", value: [] },
+    { key: "classVariant", value: [] },
+    {
+      key: "paginationVariant",
+      value: [
+        {
+          id: "colorVariant",
+          colorVariant: "hover:bg-yellow-100 text-yellow-900 border-yellow-500",
+          activeVariant: "bg-yellow-500 text-white hover:bg-yellow-500",
+        },
+      ],
+    },
+  ];
+
   const tableData = [
+    { key: "themeManager", value: themeManager },
     { key: "columns", value: columns },
     { key: "actions", value: actions },
     { key: "data", value: currentItems },

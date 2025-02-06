@@ -1,14 +1,10 @@
 import React from "react";
 import PaginationBody from "./PaginationBody";
 
-const PaginationLayout = ({ totalPages, currentPage, setCurrentPage }) => {
+const PaginationLayout = ({ data }) => {
   return (
     <div className="">
-      <PaginationBody
-        totalPages={totalPages}
-        currentPage={currentPage}
-        setCurrentPage={setCurrentPage}
-      />
+      <PaginationBody data={data} />
     </div>
   );
 };

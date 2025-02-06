@@ -1,6 +1,27 @@
 import React, { useState, useEffect, useRef } from "react";
 
-const PaginationBody = ({ totalPages, currentPage, setCurrentPage }) => {
+const PaginationBody = ({ data }) => {
+  const paginationDataArray = Array.isArray(data) ? data : [];
+  const paginationDataObject = Object.fromEntries(
+    paginationDataArray.map((item) => {
+      if (!item.key || item.value === undefined) {
+        console.warn("Invalid data format:", item);
+        return [];
+      }
+      return [item.key, item.value];
+    })
+  );
+
+  const colorVariant = paginationDataObject?.paginationVariant;
+  const totalPages = paginationDataObject?.totalPages;
+  const currentPage = paginationDataObject?.currentPage;
+  const setCurrentPage = paginationDataObject?.setCurrentPage;
+
+  const filteredColorVariant = colorVariant
+    ?.find((a) => a.key === "paginationVariant")
+    ?.value?.find((a) => a.id === "colorVariant");
+  console.log(filteredColorVariant);
+
   const [dropdownType, setDropdownType] = useState(null);
   const [position, setPosition] = useState("bottom");
 
@@ -112,7 +133,11 @@ const PaginationBody = ({ totalPages, currentPage, setCurrentPage }) => {
       <button
         onClick={handlePrevClick}
         disabled={currentPage === 1}
-        className="px-3 py-1 hover:bg-cyan-100 text-cyan-900 flex items-center justify-center border border-cyan-500 rounded disabled:opacity-50"
+        className={`px-3 py-1 flex items-center justify-center border rounded disabled:opacity-50 ${
+          filteredColorVariant?.colorVariant
+            ? filteredColorVariant?.colorVariant
+            : `hover:bg-cyan-100 text-cyan-900 border-cyan-500`
+        }`}
         aria-label="Previous Page"
       >
         Prev
@@ -123,10 +148,24 @@ const PaginationBody = ({ totalPages, currentPage, setCurrentPage }) => {
             {typeof page === "number" ? (
               <button
                 onClick={() => handlePageClick(page)}
-                className={`w-[32px] flex justify-center items-center py-1 border border-cyan-500 rounded cursor-pointer transition-all ${
+                className={`w-[32px] flex justify-center items-center py-1 border ${
+                  filteredColorVariant?.colorVariant
+                    ? filteredColorVariant?.colorVariant
+                    : "border-cyan-500"
+                } rounded cursor-pointer transition-all ${
                   page === currentPage
-                    ? "bg-cyan-500 text-white"
-                    : "hover:bg-cyan-100 text-cyan-900"
+                    ? `${
+                        filteredColorVariant?.activeVariant
+                          ? filteredColorVariant?.activeVariant
+                          : "bg-cyan-500 text-white"
+                      }`
+                    : `${
+                        filteredColorVariant?.colorVariant
+                          ? filteredColorVariant?.colorVariant
+                          : `${
+                              page === currentPage ? null : "hover:bg-cyan-100"
+                            } text-cyan-900`
+                      }`
                 }`}
                 aria-label={`Page ${page}`}
               >
@@ -138,7 +177,11 @@ const PaginationBody = ({ totalPages, currentPage, setCurrentPage }) => {
                   ref={(el) => (buttonRefs.current[page] = el)}
                   onClick={(e) => handleDropdownClick(e, page)}
                   aria-expanded={dropdownType === page}
-                  className="px-1 md:px-0 md:w-[32px] text-cyan-500 flex justify-center items-center py-1 cursor-pointer hover:bg-cyan-100 rounded-[50%]"
+                  className={`px-1 md:px-0 md:w-[32px] flex justify-center items-center py-1 cursor-pointer rounded-[50%] ${
+                    filteredColorVariant?.colorVariant
+                      ? filteredColorVariant?.colorVariant
+                      : "hover:bg-cyan-100 text-cyan-500"
+                  }`}
                 >
                   •••
                 </button>
@@ -151,19 +194,39 @@ const PaginationBody = ({ totalPages, currentPage, setCurrentPage }) => {
                     }`}
                   >
                     {page === "left" ? (
-                      <li className="bg-white border-b border-cyan-300 rounded-t p-0.5">
+                      <li
+                        className={` border-b rounded-t p-0.5 ${
+                          filteredColorVariant?.colorVariant
+                            ? filteredColorVariant?.colorVariant
+                            : "bg-white border-cyan-300"
+                        }`}
+                      >
                         <button
                           onClick={() => handlePageClick(totalPages)}
-                          className="block text-cyan-500 w-full p-1 hover:bg-cyan-100 rounded-t"
+                          className={`block w-full p-1 rounded-t ${
+                            filteredColorVariant?.colorVariant
+                              ? filteredColorVariant?.colorVariant
+                              : "text-cyan-500 hover:bg-cyan-100"
+                          }`}
                         >
                           ⥬
                         </button>
                       </li>
                     ) : page === "right" ? (
-                      <li className="bg-white border-b border-cyan-300 rounded-t p-0.5">
+                      <li
+                        className={` border-b rounded-t p-0.5 ${
+                          filteredColorVariant?.colorVariant
+                            ? filteredColorVariant?.colorVariant
+                            : "bg-white border-cyan-300"
+                        }`}
+                      >
                         <button
                           onClick={() => handlePageClick(1)}
-                          className="block text-cyan-500 w-full p-1 hover:bg-cyan-100 rounded-t"
+                          className={`block w-full p-1 rounded-t ${
+                            filteredColorVariant?.colorVariant
+                              ? filteredColorVariant?.colorVariant
+                              : "text-cyan-500 hover:bg-cyan-100"
+                          }`}
                         >
                           ⥪
                         </button>
@@ -175,7 +238,11 @@ const PaginationBody = ({ totalPages, currentPage, setCurrentPage }) => {
                         <li key={dropdownPage}>
                           <button
                             onClick={() => handlePageClick(dropdownPage)}
-                            className="block text-cyan-900 w-full p-0.5 hover:bg-cyan-100 rounded"
+                            className={`block w-full p-0.5 rounded ${
+                              filteredColorVariant?.colorVariant
+                                ? filteredColorVariant?.colorVariant
+                                : "text-cyan-900 hover:bg-cyan-100"
+                            }`}
                           >
                             {dropdownPage}
                           </button>
@@ -192,7 +259,11 @@ const PaginationBody = ({ totalPages, currentPage, setCurrentPage }) => {
       <button
         onClick={handleNextClick}
         disabled={currentPage === totalPages}
-        className="px-3 py-1 text-cyan-900 flex items-center justify-center hover:bg-cyan-100 border border-cyan-500 rounded disabled:opacity-50"
+        className={`px-3 py-1 flex items-center justify-center border ${
+          filteredColorVariant?.colorVariant
+            ? filteredColorVariant?.colorVariant
+            : "hover:bg-cyan-100 text-cyan-900 border-cyan-500"
+        } rounded disabled:opacity-50`}
         aria-label="Next Page"
       >
         Next

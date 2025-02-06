@@ -7,38 +7,64 @@ const TablePageFour = () => {
   const { data } = useGetPokemonListsQuery({ page: currentPage });
 
   const columns = [
-    { header: "ID", key: "id", icon: "#" },
-    { header: "Name", key: "name" },
-    { header: "Status", key: "status" },
-    { header: "Species", key: "species" },
-    { header: "Type", key: "type" },
-    { header: "Gender", key: "gender" },
-    { header: "Management", key: "actions", action: "actions" },
+    { key: "manager", value: [] },
+    {
+      key: "data",
+      value: [
+        { header: "ID", key: "id", icon: "#" },
+        { header: "Name", key: "name" },
+        { header: "Status", key: "status" },
+        { header: "Species", key: "species" },
+        { header: "Type", key: "type" },
+        { header: "Gender", key: "gender" },
+        { header: "Management", key: "actions", action: "actions" },
+      ],
+    },
   ];
 
   const footers = [
-    { footer: "Total Items", key: "id" },
-    { footer: data?.info?.count, key: "gender" },
+    { key: "manager", value: [] },
+    {
+      key: "data",
+      value: [
+        { footer: "Total Items", key: "id" },
+        { footer: data?.info?.count, key: "gender" },
+      ],
+    },
   ];
 
   const actions = [
-    { id: "classVariant", actionsFlexType: "horizontal", actionsBetween: 8 },
     {
-      label: "Edit",
-      onClick: (row) => handleAction(row, "edit"),
-      icon: "✎",
-      iconFlexType: "horizontal",
-      gapBetween: 4,
-      iconVariant: "text-cyan-500",
-      actionVariant: "text-yellow-500 hover:text-yellow-700",
+      key: "manager",
+      value: [
+        {
+          id: "classVariant",
+          actionsFlexType: "horizontal",
+          actionsBetween: 8,
+        },
+      ],
     },
     {
-      label: "Delete",
-      onClick: (row) => handleAction(row, "delete"),
-      icon: "✂",
-      iconFlexType: "horizontal",
-      gapBetween: 4,
-      actionVariant: "text-red-500 hover:text-red-700",
+      key: "data",
+      value: [
+        {
+          label: "Edit",
+          onClick: (row) => handleAction(row, "edit"),
+          icon: "✎",
+          iconFlexType: "horizontal",
+          gapBetween: 4,
+          iconVariant: "text-cyan-500",
+          actionVariant: "text-yellow-500 hover:text-yellow-700",
+        },
+        {
+          label: "Delete",
+          onClick: (row) => handleAction(row, "delete"),
+          icon: "✂",
+          iconFlexType: "horizontal",
+          gapBetween: 4,
+          actionVariant: "text-red-500 hover:text-red-700",
+        },
+      ],
     },
   ];
 
@@ -47,12 +73,18 @@ const TablePageFour = () => {
   };
 
   const merges = [
-    { type: "header", startCol: 1, colSpan: 1, rowSpan: 1 },
-    { type: "header", startCol: 1, colSpan: 1, rowSpan: 1 },
-    { type: "body", startRow: 1, startCol: 1, colSpan: 1, rowSpan: 1 },
-    { type: "body", startRow: 1, startCol: 1, colSpan: 1, rowSpan: 1 },
-    { type: "footer", startCol: 0, colSpan: 5, rowSpan: 1 },
-    { type: "footer", startCol: 5, colSpan: 2, rowSpan: 1 },
+    { key: "manager", value: [] },
+    {
+      key: "data",
+      value: [
+        { type: "header", startCol: 1, colSpan: 1, rowSpan: 1 },
+        { type: "header", startCol: 1, colSpan: 1, rowSpan: 1 },
+        { type: "body", startRow: 1, startCol: 1, colSpan: 1, rowSpan: 1 },
+        { type: "body", startRow: 1, startCol: 1, colSpan: 1, rowSpan: 1 },
+        { type: "footer", startCol: 0, colSpan: 5, rowSpan: 1 },
+        { type: "footer", startCol: 5, colSpan: 2, rowSpan: 1 },
+      ],
+    },
   ];
 
   const tableData = [
