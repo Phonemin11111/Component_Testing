@@ -12,12 +12,16 @@ const ReuseableTable = ({ data }) => {
     })
   );
 
+  const tableCaption = tableDataObject?.caption;
   const tableColumns = tableDataObject?.columns;
   const tableData = tableDataObject?.data;
   const tableActions = tableDataObject?.actions;
   const tableMerges = tableDataObject?.merges;
   const tableFooters = tableDataObject?.footers;
+  const tableTheme = tableDataObject?.captionVariant;
 
+  const filteredTableCaption =
+    tableCaption?.find((cap) => cap.key === "data")?.value || [];
   const filteredTableColumns =
     tableColumns?.find((col) => col.key === "data")?.value || [];
   const filteredTableMerges =
@@ -26,16 +30,29 @@ const ReuseableTable = ({ data }) => {
     tableFooters?.find((f) => f.key === "data")?.value || [];
   const filteredActionsData =
     tableActions?.find((action) => action.key === "data")?.value || [];
+  const filteredTableData =
+    tableData?.find((b) => b.key === "data")?.value?.data || [];
 
+  const filteredLayoutVariant = tableTheme?.find(
+    (a) => a.key === "layoutVariant"
+  )?.value?.dataLayout;
+  const captionPosition = filteredLayoutVariant?.find(
+    (a) => a.id === "caption"
+  );
+
+  const captionVariant = tableCaption?.find((a) => a.key === "manager")?.value;
   const columnsVariant = tableColumns
     ?.find((a) => a.key === "manager")
     ?.value?.find((a) => a.id === "columnsVariant");
-  const bodyVariant = tableColumns
+  const bodyVariant = tableData
     ?.find((a) => a.key === "manager")
     ?.value?.find((a) => a.id === "bodyVariant");
   const actionsVariant = tableActions
     ?.find((a) => a.key === "manager")
     ?.value?.find((a) => a.id === "actionsVariant");
+  const footersVariant = tableFooters
+    ?.find((a) => a.key === "manager")
+    ?.value?.find((a) => a.id === "footerVariant");
 
   const actionsColumnIndex = filteredTableColumns?.findIndex(
     (col) => col.action === "actions" && col.key
@@ -101,12 +118,29 @@ const ReuseableTable = ({ data }) => {
   return (
     <div>
       <div className="overflow-auto w-full custom-scrollbar">
-        <table className="w-full table-auto border-collapse border border-cyan-300">
+        <table className={`w-full table-auto border-collapse`}>
+          <caption
+            style={{
+              marginBottom: `${captionPosition?.gapBelow || 10}px`,
+              fontSize: `${captionVariant?.fontSize || "12"}px`,
+              fontWeight: `${captionVariant?.fontWeight || "normal"}`,
+            }}
+            className={`${
+              captionVariant?.captionVariant && captionVariant?.captionVariant
+            } ${
+              captionPosition?.dataPosition
+                ? captionPosition?.dataPosition
+                : "text-center"
+            }`}
+          >
+            {filteredTableCaption}
+          </caption>
+
           <thead
             className={`${
               columnsVariant?.dataVariant
                 ? columnsVariant?.dataVariant
-                : "bg-cyan-100 rounded-t-lg"
+                : "bg-cyan-100"
             }`}
           >
             <tr>
@@ -166,7 +200,7 @@ const ReuseableTable = ({ data }) => {
           </thead>
 
           <tbody>
-            {tableData?.map((row, rowIndex) => {
+            {filteredTableData?.map((row, rowIndex) => {
               const actionColumnCoveredInBody = isActionColumnCovered(
                 rowIndex,
                 "body"
@@ -232,7 +266,7 @@ const ReuseableTable = ({ data }) => {
                                 action.onClick && action.onClick(row)
                               }
                               className={`${
-                                action.dataVariant ||
+                                action.actionVariant ||
                                 "text-gray-500 hover:text-gray-700"
                               } flex ${
                                 action.iconFlexType === "horizontal"
@@ -258,7 +292,13 @@ const ReuseableTable = ({ data }) => {
           </tbody>
 
           {filteredTableFooters && filteredTableFooters.length > 0 && (
-            <tfoot className="bg-cyan-50">
+            <tfoot
+              className={`${
+                footersVariant?.dataVariant
+                  ? footersVariant?.dataVariant
+                  : "bg-cyan-100"
+              }`}
+            >
               <tr>
                 {filteredColumns.map((col, colIndex) => {
                   const mergeAttrs = getMergeAttributes(0, colIndex, "footer");
@@ -267,15 +307,33 @@ const ReuseableTable = ({ data }) => {
                     <td
                       key={colIndex}
                       {...mergeAttrs}
-                      className="px-4 py-2 text-sm font-medium text-gray-700 border border-cyan-300"
+                      className={`${
+                        footersVariant?.dataVariant
+                          ? footersVariant?.dataVariant
+                          : "px-4 py-2 text-left text-sm font-medium text-gray-700 border border-cyan-300"
+                      }`}
                     >
-                      {footerMap[col.key] || ""}
+                      <span
+                        className={`flex flex-row${
+                          footersVariant?.dataPosition
+                            ? footersVariant?.dataPosition
+                            : "items-center justify-center"
+                        }`}
+                      >
+                        {footerMap[col.key] || ""}
+                      </span>
                     </td>
                   );
                 })}
                 {filteredActionsData?.length > 0 &&
                   !isActionColumnCovered(0, "footer") && (
-                    <td className="px-4 py-2 text-sm font-medium text-gray-700 border border-cyan-300">
+                    <td
+                      className={`${
+                        footersVariant?.dataVariant
+                          ? footersVariant?.dataVariant
+                          : "px-4 py-2 text-left text-sm font-medium text-gray-700 border border-cyan-300"
+                      }`}
+                    >
                       {footerMap[actionColumn?.key] || ""}
                     </td>
                   )}

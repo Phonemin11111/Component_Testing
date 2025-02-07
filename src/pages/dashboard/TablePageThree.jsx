@@ -17,12 +17,6 @@ const TablePageThree = () => {
             "bg-yellow-100 px-3 py-1 text-left text-sm font-medium text-yellow-900 border border-yellow-300",
           dataPosition: "item-center justify-start gap-1",
         },
-        {
-          id: "bodyVariant",
-          dataVariant:
-            "bg-yellow-100 px-2 py-2 text-left text-sm font-medium text-yellow-900 border border-yellow-300",
-          dataPosition: "item-center justify-center",
-        },
       ],
     },
     {
@@ -35,6 +29,24 @@ const TablePageThree = () => {
         { header: "Category", key: "category" },
         { header: "Button", key: "button", action: "actions", icon: "📝" },
       ],
+    },
+  ];
+
+  const bodyData = [
+    {
+      key: "manager",
+      value: [
+        {
+          id: "bodyVariant",
+          dataVariant:
+            "bg-yellow-100 px-2 py-2 text-left text-sm font-medium text-yellow-900 border border-yellow-300",
+          dataPosition: "item-center justify-center",
+        },
+      ],
+    },
+    {
+      key: "data",
+      value: { data: currentItems, dataLength: currentItems?.length },
     },
   ];
 
@@ -99,8 +111,7 @@ const TablePageThree = () => {
     { key: "themeManager", value: themeManager },
     { key: "columns", value: columns },
     { key: "actions", value: actions },
-    { key: "data", value: currentItems },
-    { key: "dataLength", value: currentItems?.length },
+    { key: "data", value: bodyData },
     { key: "perPage", value: 5 },
   ];
 

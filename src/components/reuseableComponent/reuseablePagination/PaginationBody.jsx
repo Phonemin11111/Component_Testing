@@ -19,8 +19,7 @@ const PaginationBody = ({ data }) => {
 
   const filteredColorVariant = colorVariant
     ?.find((a) => a.key === "paginationVariant")
-    ?.value?.find((a) => a.id === "colorVariant");
-  console.log(filteredColorVariant);
+    ?.value?.find((a) => a.id === "colorScheme");
 
   const [dropdownType, setDropdownType] = useState(null);
   const [position, setPosition] = useState("bottom");
@@ -135,7 +134,7 @@ const PaginationBody = ({ data }) => {
         disabled={currentPage === 1}
         className={`px-3 py-1 flex items-center justify-center border rounded disabled:opacity-50 ${
           filteredColorVariant?.colorVariant
-            ? `${filteredColorVariant?.colorVariant} ${filteredColorVariant?.hoverVariant}`
+            ? `${filteredColorVariant?.colorVariant} ${filteredColorVariant?.hoverVariant} ${filteredColorVariant?.backgroundVariant}`
             : `hover:bg-cyan-100 text-cyan-900 border-cyan-500`
         }`}
         aria-label="Previous Page"
@@ -154,7 +153,7 @@ const PaginationBody = ({ data }) => {
                         page === currentPage
                           ? null
                           : filteredColorVariant?.hoverVariant
-                      }`
+                      } ${filteredColorVariant?.backgroundVariant}`
                     : "border-cyan-500"
                 } rounded cursor-pointer transition-all ${
                   page === currentPage
@@ -269,7 +268,7 @@ const PaginationBody = ({ data }) => {
         disabled={currentPage === totalPages}
         className={`px-3 py-1 flex items-center justify-center border ${
           filteredColorVariant?.colorVariant
-            ? `${filteredColorVariant?.colorVariant} ${filteredColorVariant?.hoverVariant}`
+            ? `${filteredColorVariant?.colorVariant} ${filteredColorVariant?.hoverVariant} ${filteredColorVariant?.backgroundVariant}`
             : "hover:bg-cyan-100 text-cyan-900 border-cyan-500"
         } rounded disabled:opacity-50`}
         aria-label="Next Page"

@@ -7,7 +7,17 @@ const TablePageFour = () => {
   const { data } = useGetPokemonListsQuery({ page: currentPage });
 
   const columns = [
-    { key: "manager", value: [] },
+    {
+      key: "manager",
+      value: [
+        {
+          id: "columnsVariant",
+          dataVariant:
+            "bg-red-100 px-3 py-1 text-sm font-medium text-red-900 border border-red-300",
+          dataPosition: "item-center justify-center gap-1",
+        },
+      ],
+    },
     {
       key: "data",
       value: [
@@ -22,14 +32,57 @@ const TablePageFour = () => {
     },
   ];
 
+  const bodyData = [
+    {
+      key: "manager",
+      value: [
+        {
+          id: "bodyVariant",
+          dataVariant:
+            "bg-yellow-100 px-2 py-2 text-sm font-medium text-yellow-900 border border-yellow-300",
+          dataPosition: "item-center justify-center",
+        },
+      ],
+    },
+    {
+      key: "data",
+      value: { data: data?.results, dataLength: data?.info?.count },
+    },
+  ];
+
   const footers = [
-    { key: "manager", value: [] },
+    {
+      key: "manager",
+      value: [
+        {
+          id: "footerVariant",
+          dataVariant:
+            "bg-gray-100 px-2 py-2 text-sm font-medium text-gray-900 border border-gray-300",
+          dataPosition: "item-center justify-center",
+        },
+      ],
+    },
     {
       key: "data",
       value: [
         { footer: "Total Items", key: "id" },
         { footer: data?.info?.count, key: "gender" },
       ],
+    },
+  ];
+
+  const caption = [
+    {
+      key: "manager",
+      value: {
+        fontSize: 25,
+        fontWeight: "bold",
+        captionVariant: "text-cyan-500",
+      },
+    },
+    {
+      key: "data",
+      value: "Item Table",
     },
   ];
 
@@ -73,20 +126,33 @@ const TablePageFour = () => {
   };
 
   const themeManager = [
-    { key: "layoutVariant", value: [] },
-    { key: "classVariant", value: [] },
-    // {
-    //   key: "paginationVariant",
-    //   value: [
-    //     {
-    //       id: "colorVariant",
-    //       dropdownVariant: "bg-white",
-    //       hoverVariant: "hover:bg-yellow-100",
-    //       colorVariant: "text-yellow-900 border-yellow-500",
-    //       activeVariant: "bg-yellow-500 text-white",
-    //     },
-    //   ],
-    // },
+    {
+      key: "layoutVariant",
+      value: {
+        gapBetween: 5,
+        dataLayout: [
+          { id: "caption", dataPosition: "text-start", gapBelow: 30 },
+          {
+            id: "pagination",
+            dataPosition: "justify-center md:justify-start",
+            gapAbove: 20,
+          },
+        ],
+      },
+    },
+    {
+      key: "paginationVariant",
+      value: [
+        {
+          id: "colorScheme",
+          dropdownVariant: "bg-white",
+          backgroundVariant: "bg-white",
+          hoverVariant: "hover:bg-yellow-100",
+          colorVariant: "text-yellow-900 border-yellow-500",
+          activeVariant: "bg-yellow-500 text-white",
+        },
+      ],
+    },
   ];
 
   const merges = [
@@ -106,11 +172,11 @@ const TablePageFour = () => {
 
   const tableData = [
     { key: "themeManager", value: themeManager },
+    { key: "caption", value: caption },
     { key: "columns", value: columns },
     { key: "actions", value: actions },
     { key: "footers", value: footers },
-    { key: "data", value: data?.results },
-    { key: "dataLength", value: data?.info?.count },
+    { key: "data", value: bodyData },
     { key: "perPage", value: 20 },
     { key: "currentPage", value: currentPage },
     { key: "setCurrentPage", value: setCurrentPage },
@@ -118,11 +184,22 @@ const TablePageFour = () => {
   ];
 
   return (
-    <div className="flex flex-col w-full h-full gap-5">
-      <h1 className="text-xl font-bold">Item Table</h1>
+    <div className="w-full h-full">
       <TableGroup data={tableData} />
     </div>
   );
 };
 
 export default TablePageFour;
+
+//___To Do____________
+//====================
+//1. Cell Manager {Text Background for status, cell width & height}
+//2. Action Separate Columns
+//3. Multi-Captions
+//4. Multi-Header rows/Add new cell
+//5. Multi-Footer rows/Add new cell
+//6. Add New Body row/cell
+//7. Checkbox Columns
+//8. Colgroup/Advance Columns Manager
+//9. Rowgroup/Advance Row Manager
