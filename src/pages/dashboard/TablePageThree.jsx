@@ -107,18 +107,30 @@ const TablePageThree = () => {
     },
   ];
 
+  const paginationEngines = {
+    pagination: true,
+    sortDate: true,
+    sortTime: true,
+    goPage: true,
+    perPage: true,
+  };
+
   const tableData = [
     { key: "themeManager", value: themeManager },
     { key: "columns", value: columns },
     { key: "actions", value: actions },
     { key: "data", value: bodyData },
-    { key: "perPage", value: 5 },
+    { key: "perPage", value: 2 },
   ];
 
   return (
     <div className=" flex flex-col w-full h-full gap-5">
       <h1 className="text-xl font-bold mb-4">Item Table</h1>
-      <TableGroup data={tableData} frontendMode />
+      <TableGroup
+        data={tableData}
+        frontendMode
+        paginationCore={paginationEngines}
+      />
     </div>
   );
 };

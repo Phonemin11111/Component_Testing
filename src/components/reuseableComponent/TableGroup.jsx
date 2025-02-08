@@ -4,7 +4,7 @@ import ReusableTable from "./ReuseableTable";
 import PaginationLayout from "./reuseablePagination/PaginationLayout";
 import "../../CyanIC.css";
 
-const TableGroup = ({ data, frontendMode }) => {
+const TableGroup = ({ data, frontendMode, paginationCore }) => {
   const tableDataArray = Array.isArray(data) ? data : [];
   const tableData = Object.fromEntries(
     tableDataArray.map((item) => {
@@ -65,7 +65,12 @@ const TableGroup = ({ data, frontendMode }) => {
   }
 
   useEffect(() => {
-    if (!frontendMode && currentPage !== tableData.currentPage) {
+    if (
+      !frontendMode &&
+      currentPage !== tableData.currentPage &&
+      tableData.currentPage &&
+      tableData.setCurrentPage
+    ) {
       tableData.setCurrentPage(currentPage);
     }
   }, [currentPage, tableData, frontendMode]);
@@ -94,23 +99,26 @@ const TableGroup = ({ data, frontendMode }) => {
       key: "paginationVariant",
       value: tableData.themeManager || [],
     },
+    { key: "paginationEngines", value: paginationCore || [] },
   ];
 
   return (
     <div className="flex flex-col w-full h-full">
       <ReusableTable data={gridData} />
-      <div
-        style={{
-          marginTop: `${paginationPosition?.gapAbove || 20}px`,
-        }}
-        className={`flex ${
-          paginationPosition?.dataPosition
-            ? paginationPosition?.dataPosition
-            : "justify-center xl:justify-end"
-        }`}
-      >
-        <PaginationLayout data={paginationData} />
-      </div>
+      {paginationCore && (
+        <div
+          style={{
+            marginTop: `${paginationPosition?.gapAbove || 20}px`,
+          }}
+          className={`flex ${
+            paginationPosition?.dataPosition
+              ? paginationPosition?.dataPosition
+              : "justify-center xl:justify-end"
+          }`}
+        >
+          <PaginationLayout data={paginationData} />
+        </div>
+      )}
     </div>
   );
 };

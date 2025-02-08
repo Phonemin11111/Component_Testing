@@ -185,7 +185,7 @@ const TablePageFour = () => {
 
   return (
     <div className="w-full h-full">
-      <TableGroup data={tableData} />
+      <TableGroup data={tableData} paginationCore />
     </div>
   );
 };
@@ -203,3 +203,4 @@ export default TablePageFour;
 //7. Checkbox Columns
 //8. Colgroup/Advance Columns Manager
 //9. Rowgroup/Advance Row Manager
+//[done] 10. Pagination Core & Engines

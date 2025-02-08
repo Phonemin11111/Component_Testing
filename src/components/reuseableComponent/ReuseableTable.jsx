@@ -199,7 +199,7 @@ const ReuseableTable = ({ data }) => {
             </tr>
           </thead>
 
-          <tbody>
+          <tbody className="">
             {filteredTableData?.map((row, rowIndex) => {
               const actionColumnCoveredInBody = isActionColumnCovered(
                 rowIndex,
