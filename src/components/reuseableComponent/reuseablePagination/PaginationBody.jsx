@@ -149,14 +149,23 @@ const PaginationBody = ({ data }) => {
                 onClick={() => handlePageClick(page)}
                 className={`w-[32px] flex justify-center items-center py-1 border ${
                   filteredColorVariant?.colorVariant
-                    ? `${filteredColorVariant?.colorVariant?.substring(
-                        15,
-                        filteredColorVariant?.colorVariant?.length
-                      )} ${
+                    ? `${
+                        page === currentPage &&
+                        !filteredColorVariant?.activeVariant
+                          ? "border-cyan-500"
+                          : filteredColorVariant?.colorVariant?.substring(
+                              15,
+                              filteredColorVariant?.colorVariant?.length
+                            )
+                      } ${
                         page === currentPage
                           ? filteredColorVariant?.activeVariant
                           : filteredColorVariant?.hoverVariant
-                      } ${filteredColorVariant?.backgroundVariant}`
+                      } ${
+                        page === currentPage
+                          ? "border-cyan-500"
+                          : filteredColorVariant?.backgroundVariant
+                      }`
                     : "border-cyan-500"
                 } rounded cursor-pointer transition-all ${
                   page === currentPage

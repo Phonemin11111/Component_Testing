@@ -1,5 +1,6 @@
 import DashboardLayout from "../components/dashboard/DashboardLayout";
 import TestOne from "../components/test/TestOne";
+import TestTwo from "../components/test/TestTwo";
 import Home from "../pages/dashboard/Home";
 import TablePageFour from "../pages/dashboard/TablePageFour";
 import TablePageOne from "../pages/dashboard/TablePageOne";
@@ -36,6 +37,10 @@ const dashboardRoute = [
       {
         path: "/cms-admin/testOne",
         element: <TestOne />,
+      },
+      {
+        path: "/cms-admin/testTwo",
+        element: <TestTwo />,
       },
     ],
   },
