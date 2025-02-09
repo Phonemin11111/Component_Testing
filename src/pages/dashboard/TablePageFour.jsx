@@ -46,7 +46,12 @@ const TablePageFour = () => {
     },
     {
       key: "data",
-      value: { data: data?.results, dataLength: data?.info?.count },
+      value: {
+        data: data?.results,
+        dataLength: data?.info?.count,
+        currentPage: currentPage,
+        setCurrentPage: setCurrentPage,
+      },
     },
   ];
 
@@ -134,8 +139,10 @@ const TablePageFour = () => {
           { id: "caption", dataPosition: "text-start", gapBelow: 30 },
           {
             id: "pagination",
-            dataPosition: "justify-center md:justify-start",
+            dataPosition: "justify-center md:justify-end",
             gapAbove: 20,
+            gapBetween: 18,
+            reverse: { X: false, Y: true },
           },
         ],
       },
@@ -150,6 +157,7 @@ const TablePageFour = () => {
           hoverVariant: "hover:bg-yellow-100",
           colorVariant: "text-yellow-900 border-yellow-500",
           activeVariant: "bg-yellow-500 text-white",
+          buttonVariant: "hover:text-yellow-500",
         },
       ],
     },
@@ -164,11 +172,27 @@ const TablePageFour = () => {
         { type: "header", startCol: 1, colSpan: 1, rowSpan: 1 },
         { type: "body", startRow: 1, startCol: 1, colSpan: 1, rowSpan: 1 },
         { type: "body", startRow: 1, startCol: 1, colSpan: 1, rowSpan: 1 },
+        {
+          type: "body",
+          startRow: 1,
+          startCol: 4,
+          colSpan: 3,
+          rowSpan: 1,
+          showData: 6,
+        },
         { type: "footer", startCol: 0, colSpan: 5, rowSpan: 1 },
         { type: "footer", startCol: 5, colSpan: 2, rowSpan: 1 },
       ],
     },
   ];
+
+  const paginationEngines = {
+    pagination: true,
+    sortDate: true,
+    sortTime: true,
+    goPage: true,
+    perPage: true,
+  };
 
   const tableData = [
     { key: "themeManager", value: themeManager },
@@ -178,14 +202,12 @@ const TablePageFour = () => {
     { key: "footers", value: footers },
     { key: "data", value: bodyData },
     { key: "perPage", value: 20 },
-    { key: "currentPage", value: currentPage },
-    { key: "setCurrentPage", value: setCurrentPage },
     { key: "merges", value: merges },
   ];
 
   return (
     <div className="w-full h-full">
-      <TableGroup data={tableData} paginationCore />
+      <TableGroup data={tableData} paginationCore={paginationEngines} />
     </div>
   );
 };

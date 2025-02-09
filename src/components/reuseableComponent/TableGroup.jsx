@@ -15,11 +15,14 @@ const TableGroup = ({ data, frontendMode, paginationCore }) => {
   const theme = tableData?.themeManager;
   const items = tableData.data;
   const filteredTableData = items?.find((b) => b.key === "data")?.value || [];
-  const itemsPerPage = tableData.perPage;
+  const [perPage, setPerPage] = useState(tableData.perPage);
+  const itemsPerPage = perPage;
   const [searchParams, setSearchParams] = useSearchParams();
   const [currentPage, setLocalCurrentPage] = useState(
-    frontendMode ? 1 : tableData.currentPage
+    frontendMode ? 1 : filteredTableData.currentPage
   );
+  const parentCurrentPage = filteredTableData.currentPage;
+  const parentSetCurrentPage = filteredTableData.setCurrentPage;
 
   const filteredLayoutVariant = theme?.find((a) => a.key === "layoutVariant")
     ?.value?.dataLayout;
@@ -36,10 +39,10 @@ const TableGroup = ({ data, frontendMode, paginationCore }) => {
   }, [searchParams]);
 
   useEffect(() => {
-    if (currentPage !== tableData.currentPage) {
+    if (currentPage !== parentCurrentPage) {
       setSearchParams(`?page=${currentPage}`);
     }
-  }, [currentPage, tableData.currentPage, setSearchParams]);
+  }, [currentPage, parentCurrentPage, setSearchParams]);
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -67,13 +70,19 @@ const TableGroup = ({ data, frontendMode, paginationCore }) => {
   useEffect(() => {
     if (
       !frontendMode &&
-      currentPage !== tableData.currentPage &&
-      tableData.currentPage &&
-      tableData.setCurrentPage
+      currentPage !== parentCurrentPage &&
+      parentCurrentPage &&
+      parentSetCurrentPage
     ) {
-      tableData.setCurrentPage(currentPage);
+      parentSetCurrentPage(currentPage);
     }
-  }, [currentPage, tableData, frontendMode]);
+  }, [currentPage, parentCurrentPage, parentSetCurrentPage, frontendMode]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setLocalCurrentPage(totalPages);
+    }
+  }, [totalPages, currentPage]);
 
   const gridData = [
     { key: "caption", value: tableData.caption || [] },
@@ -95,11 +104,15 @@ const TableGroup = ({ data, frontendMode, paginationCore }) => {
     { key: "totalPages", value: totalPages || [] },
     { key: "currentPage", value: currentPage || [] },
     { key: "setCurrentPage", value: setLocalCurrentPage || [] },
+    { key: "defaultPerPage", value: tableData?.perPage || [] },
+    { key: "perPage", value: perPage || [] },
+    { key: "setPerPage", value: setPerPage || [] },
     {
       key: "paginationVariant",
       value: tableData.themeManager || [],
     },
     { key: "paginationEngines", value: paginationCore || [] },
+    { key: "setSearchParams", value: setSearchParams || [] },
   ];
 
   return (

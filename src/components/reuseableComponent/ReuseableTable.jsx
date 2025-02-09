@@ -1,6 +1,7 @@
 import React from "react";
 
 const ReuseableTable = ({ data }) => {
+  // Convert the passed-in data (an array of { key, value } items) into an object.
   const tableDataArray = Array.isArray(data) ? data : [];
   const tableDataObject = Object.fromEntries(
     tableDataArray.map((item) => {
@@ -12,6 +13,7 @@ const ReuseableTable = ({ data }) => {
     })
   );
 
+  // Extract various configuration sections from the data object.
   const tableCaption = tableDataObject?.caption;
   const tableColumns = tableDataObject?.columns;
   const tableData = tableDataObject?.data;
@@ -20,6 +22,7 @@ const ReuseableTable = ({ data }) => {
   const tableFooters = tableDataObject?.footers;
   const tableTheme = tableDataObject?.captionVariant;
 
+  // For each configuration section, we use the entry with key "data".
   const filteredTableCaption =
     tableCaption?.find((cap) => cap.key === "data")?.value || [];
   const filteredTableColumns =
@@ -30,9 +33,11 @@ const ReuseableTable = ({ data }) => {
     tableFooters?.find((f) => f.key === "data")?.value || [];
   const filteredActionsData =
     tableActions?.find((action) => action.key === "data")?.value || [];
+  // Note: the table data is provided as an object with a "data" property.
   const filteredTableData =
     tableData?.find((b) => b.key === "data")?.value?.data || [];
 
+  // Get theme/layout configurations.
   const filteredLayoutVariant = tableTheme?.find(
     (a) => a.key === "layoutVariant"
   )?.value?.dataLayout;
@@ -54,13 +59,20 @@ const ReuseableTable = ({ data }) => {
     ?.find((a) => a.key === "manager")
     ?.value?.find((a) => a.id === "footerVariant");
 
+  // The columns array in your configuration has two parts:
+  //   • The first part (“manager”) holds settings (like styling) for the columns.
+  //   • The second part (“data”) holds the actual column definitions.
+  //
+  // In your columns "data", you have one column (the last one, with key "actions")
+  // that is handled separately. We filter that out here.
   const actionsColumnIndex = filteredTableColumns?.findIndex(
     (col) => col.action === "actions" && col.key
   );
-
   const filteredColumns = filteredTableColumns?.filter((col) => !col.action);
+  // Save the "actions" column (management column) for later use.
   const actionColumn = filteredTableColumns?.find((col) => col.action);
 
+  // Build a map for footer content based on column key.
   const footerMap = filteredTableFooters
     ? filteredTableFooters.reduce((acc, item) => {
         acc[item.key] = item.footer;
@@ -68,8 +80,23 @@ const ReuseableTable = ({ data }) => {
       }, {})
     : {};
 
+  // Total number of data rows.
   const totalBodyRows = tableData ? tableData.length : 0;
 
+  // ---------------------------
+  // MERGE HANDLING FUNCTION
+  // ---------------------------
+  //
+  // This function checks if the cell at (rowIndex, colIndex) in the given section
+  // ("header", "body", or "footer") is part of a merge rule.
+  //
+  // If a merge rule applies, we look at its "showData" property:
+  //   • If present, that tells us which column in the merged group should display the data.
+  //   • Otherwise, we default to the starting column (startCol).
+  //
+  // Only the cell at the designated “display” column (and in the starting row of the merge)
+  // returns the merge attributes (colSpan and rowSpan). All other cells covered by the merge
+  // return null, so they will be skipped during rendering.
   const getMergeAttributes = (rowIndex, colIndex, section = "body") => {
     if (!filteredTableMerges) return {};
 
@@ -83,25 +110,31 @@ const ReuseableTable = ({ data }) => {
     );
 
     if (mergeItem) {
-      if (
-        rowIndex === (mergeItem.startRow || 0) &&
-        colIndex === mergeItem.startCol
-      ) {
+      // Determine which column should show the data.
+      const displayCol =
+        mergeItem.showData !== undefined
+          ? mergeItem.showData
+          : mergeItem.startCol;
+      // Only render the cell if it’s at the designated display column and the first row of the merge.
+      if (rowIndex === (mergeItem.startRow || 0) && colIndex === displayCol) {
         return {
           colSpan: mergeItem.colSpan,
           rowSpan: mergeItem.rowSpan || totalBodyRows + 1,
         };
       }
+      // Otherwise, return null to indicate this cell is merged into another.
       return null;
     }
-
     return {};
   };
 
+  // ---------------------------
+  // HELPER: Check if the actions (management) column is covered by a merge.
+  // (The actions column is rendered separately and its index equals the number of
+  // regular (filtered) columns.)
   const isActionColumnCovered = (rowIndex, section = "body") => {
-    const actionColIndex = filteredColumns.length;
+    const actionColIndex = filteredColumns.length; // actions column sits after the data columns.
     if (!filteredTableMerges) return false;
-
     return filteredTableMerges.some((m) => {
       if (m.type !== section) return false;
       return (
@@ -113,55 +146,51 @@ const ReuseableTable = ({ data }) => {
     });
   };
 
+  // For header and footer, we use rowIndex = 0.
   const actionColumnCoveredInHeader = isActionColumnCovered(0, "header");
+  const actionColumnCoveredInFooter = isActionColumnCovered(0, "footer");
 
+  // ---------------------------
+  // RENDERING
+  // ---------------------------
   return (
     <div>
       <div className="overflow-auto w-full custom-scrollbar">
-        <table className={`w-full table-auto border-collapse`}>
+        <table className="w-full table-auto border-collapse">
+          {/* CAPTION */}
           <caption
             style={{
               marginBottom: `${captionPosition?.gapBelow || 10}px`,
               fontSize: `${captionVariant?.fontSize || "12"}px`,
               fontWeight: `${captionVariant?.fontWeight || "normal"}`,
             }}
-            className={`${
-              captionVariant?.captionVariant && captionVariant?.captionVariant
-            } ${
-              captionPosition?.dataPosition
-                ? captionPosition?.dataPosition
-                : "text-center"
+            className={`${captionVariant?.captionVariant || ""} ${
+              captionPosition?.dataPosition || "text-center"
             }`}
           >
             {filteredTableCaption}
           </caption>
 
-          <thead
-            className={`${
-              columnsVariant?.dataVariant
-                ? columnsVariant?.dataVariant
-                : "bg-cyan-100"
-            }`}
-          >
+          {/* HEADER */}
+          <thead className={`${columnsVariant?.dataVariant || "bg-cyan-100"}`}>
             <tr>
+              {/* Render normal (data) columns */}
               {filteredColumns.map((col, colIndex) => {
                 const mergeAttrs = getMergeAttributes(0, colIndex, "header");
-                if (mergeAttrs === null) return null;
+                if (mergeAttrs === null) return null; // skip cells covered by a merge.
                 return (
                   <th
                     key={colIndex}
                     {...mergeAttrs}
                     className={`${
-                      columnsVariant?.dataVariant
-                        ? columnsVariant?.dataVariant
-                        : "px-4 py-2 text-left text-sm font-medium text-gray-700 border border-cyan-300"
+                      columnsVariant?.dataVariant ||
+                      "px-4 py-2 text-left text-sm font-medium text-gray-700 border border-cyan-300"
                     }`}
                   >
                     <span
-                      className={`flex flex-row${
-                        columnsVariant?.dataPosition
-                          ? columnsVariant?.dataPosition
-                          : "items-center justify-center gap-1"
+                      className={`flex flex-row ${
+                        columnsVariant?.dataPosition ||
+                        "items-center justify-center gap-1"
                       }`}
                     >
                       {col.icon && <span>{col.icon}</span>}
@@ -170,87 +199,97 @@ const ReuseableTable = ({ data }) => {
                   </th>
                 );
               })}
+
+              {/* Render the actions (management) column, if any.
+                  Its index is equal to the length of filteredColumns. */}
               {filteredActionsData?.length > 0 &&
-                !actionColumnCoveredInHeader && (
-                  <th
-                    className={`${
-                      columnsVariant?.dataVariant
-                        ? columnsVariant?.dataVariant
-                        : "px-4 py-2 text-left text-sm font-medium text-gray-700 border border-cyan-300"
-                    }`}
-                  >
-                    <span
-                      className={`flex flex-row${
-                        columnsVariant?.dataPosition
-                          ? columnsVariant?.dataPosition
-                          : "items-center justify-center gap-1"
+                (() => {
+                  const actionsColIndex = filteredColumns.length;
+                  const mergeAttrs = getMergeAttributes(
+                    0,
+                    actionsColIndex,
+                    "header"
+                  );
+                  if (mergeAttrs === null) return null;
+                  return (
+                    <th
+                      {...mergeAttrs}
+                      className={`${
+                        columnsVariant?.dataVariant ||
+                        "px-4 py-2 text-left text-sm font-medium text-gray-700 border border-cyan-300"
                       }`}
                     >
-                      {filteredTableColumns?.[actionsColumnIndex]?.icon && (
-                        <span>
-                          {filteredTableColumns?.[actionsColumnIndex]?.icon}
-                        </span>
-                      )}
-                      {actionsColumnIndex !== -1 &&
-                        filteredTableColumns?.[actionsColumnIndex]?.header}
-                    </span>
-                  </th>
-                )}
+                      <span
+                        className={`flex flex-row ${
+                          columnsVariant?.dataPosition ||
+                          "items-center justify-center gap-1"
+                        }`}
+                      >
+                        {actionColumn?.icon && <span>{actionColumn.icon}</span>}
+                        {actionColumn?.header}
+                      </span>
+                    </th>
+                  );
+                })()}
             </tr>
           </thead>
 
-          <tbody className="">
-            {filteredTableData?.map((row, rowIndex) => {
-              const actionColumnCoveredInBody = isActionColumnCovered(
-                rowIndex,
-                "body"
-              );
-              return (
-                <tr key={rowIndex}>
-                  {filteredColumns.map((col, colIndex) => {
+          {/* BODY */}
+          <tbody>
+            {filteredTableData?.map((row, rowIndex) => (
+              <tr key={rowIndex}>
+                {/* Render normal (data) columns */}
+                {filteredColumns.map((col, colIndex) => {
+                  const mergeAttrs = getMergeAttributes(
+                    rowIndex,
+                    colIndex,
+                    "body"
+                  );
+                  if (mergeAttrs === null) return null;
+                  return (
+                    <td
+                      key={colIndex}
+                      {...mergeAttrs}
+                      className={`${
+                        bodyVariant?.dataVariant ||
+                        "px-4 py-2 text-sm text-gray-600 border border-cyan-300"
+                      }`}
+                    >
+                      <span
+                        className={`flex flex-row ${
+                          bodyVariant?.dataPosition ||
+                          "items-center justify-center"
+                        }`}
+                      >
+                        {row[col.key]}
+                      </span>
+                    </td>
+                  );
+                })}
+
+                {/* Render the actions (management) column */}
+                {filteredActionsData?.length > 0 &&
+                  (() => {
+                    const actionsColIndex = filteredColumns.length;
                     const mergeAttrs = getMergeAttributes(
                       rowIndex,
-                      colIndex,
+                      actionsColIndex,
                       "body"
                     );
                     if (mergeAttrs === null) return null;
                     return (
                       <td
-                        key={colIndex}
                         {...mergeAttrs}
                         className={`${
-                          bodyVariant?.dataVariant
-                            ? bodyVariant?.dataVariant
-                            : "px-4 py-2 text-sm text-gray-600 border border-cyan-300"
-                        }`}
-                      >
-                        <span
-                          className={`flex flex-row${
-                            bodyVariant?.dataPosition
-                              ? bodyVariant?.dataPosition
-                              : "items-center justify-center"
-                          }`}
-                        >
-                          {row[col.key]}
-                        </span>
-                      </td>
-                    );
-                  })}
-                  {filteredActionsData.length > 0 &&
-                    !actionColumnCoveredInBody && (
-                      <td
-                        className={`${
-                          bodyVariant?.dataVariant
-                            ? bodyVariant?.dataVariant
-                            : "px-4 py-2 text-sm text-gray-600 border border-cyan-300"
+                          bodyVariant?.dataVariant ||
+                          "px-4 py-2 text-sm text-gray-600 border border-cyan-300"
                         }`}
                       >
                         <div
-                          className={`${
-                            actionsVariant?.dataPosition
-                              ? actionsVariant?.dataPosition
-                              : `items-center justify-center`
-                          } flex ${
+                          className={`flex ${
+                            actionsVariant?.dataPosition ||
+                            "items-center justify-center"
+                          } ${
                             actionsVariant?.actionsFlexType === "horizontal"
                               ? "flex-row"
                               : "flex-col"
@@ -265,14 +304,14 @@ const ReuseableTable = ({ data }) => {
                               onClick={() =>
                                 action.onClick && action.onClick(row)
                               }
-                              className={`${
+                              className={`flex items-center justify-center ${
                                 action.actionVariant ||
                                 "text-gray-500 hover:text-gray-700"
-                              } flex ${
+                              } ${
                                 action.iconFlexType === "horizontal"
                                   ? "flex-row"
                                   : "flex-col"
-                              } items-center justify-center`}
+                              }`}
                               style={{ gap: `${action.gapBetween || 4}px` }}
                             >
                               {action.icon && (
@@ -285,21 +324,19 @@ const ReuseableTable = ({ data }) => {
                           ))}
                         </div>
                       </td>
-                    )}
-                </tr>
-              );
-            })}
+                    );
+                  })()}
+              </tr>
+            ))}
           </tbody>
 
+          {/* FOOTER */}
           {filteredTableFooters && filteredTableFooters.length > 0 && (
             <tfoot
-              className={`${
-                footersVariant?.dataVariant
-                  ? footersVariant?.dataVariant
-                  : "bg-cyan-100"
-              }`}
+              className={`${footersVariant?.dataVariant || "bg-cyan-100"}`}
             >
               <tr>
+                {/* Render normal (data) footer cells */}
                 {filteredColumns.map((col, colIndex) => {
                   const mergeAttrs = getMergeAttributes(0, colIndex, "footer");
                   if (mergeAttrs === null) return null;
@@ -308,16 +345,14 @@ const ReuseableTable = ({ data }) => {
                       key={colIndex}
                       {...mergeAttrs}
                       className={`${
-                        footersVariant?.dataVariant
-                          ? footersVariant?.dataVariant
-                          : "px-4 py-2 text-left text-sm font-medium text-gray-700 border border-cyan-300"
+                        footersVariant?.dataVariant ||
+                        "px-4 py-2 text-left text-sm font-medium text-gray-700 border border-cyan-300"
                       }`}
                     >
                       <span
-                        className={`flex flex-row${
-                          footersVariant?.dataPosition
-                            ? footersVariant?.dataPosition
-                            : "items-center justify-center"
+                        className={`flex flex-row ${
+                          footersVariant?.dataPosition ||
+                          "items-center justify-center"
                         }`}
                       >
                         {footerMap[col.key] || ""}
@@ -325,18 +360,29 @@ const ReuseableTable = ({ data }) => {
                     </td>
                   );
                 })}
+
+                {/* Render the actions (management) footer cell */}
                 {filteredActionsData?.length > 0 &&
-                  !isActionColumnCovered(0, "footer") && (
-                    <td
-                      className={`${
-                        footersVariant?.dataVariant
-                          ? footersVariant?.dataVariant
-                          : "px-4 py-2 text-left text-sm font-medium text-gray-700 border border-cyan-300"
-                      }`}
-                    >
-                      {footerMap[actionColumn?.key] || ""}
-                    </td>
-                  )}
+                  (() => {
+                    const actionsColIndex = filteredColumns.length;
+                    const mergeAttrs = getMergeAttributes(
+                      0,
+                      actionsColIndex,
+                      "footer"
+                    );
+                    if (mergeAttrs === null) return null;
+                    return (
+                      <td
+                        {...mergeAttrs}
+                        className={`${
+                          footersVariant?.dataVariant ||
+                          "px-4 py-2 text-left text-sm font-medium text-gray-700 border border-cyan-300"
+                        }`}
+                      >
+                        {footerMap[actionColumn?.key] || ""}
+                      </td>
+                    );
+                  })()}
               </tr>
             </tfoot>
           )}

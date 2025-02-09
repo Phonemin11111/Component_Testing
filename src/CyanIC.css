@@ -19,3 +19,7 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+input::-webkit-input-placeholder {
+  text-align: center;
+}

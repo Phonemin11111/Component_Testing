@@ -149,9 +149,12 @@ const PaginationBody = ({ data }) => {
                 onClick={() => handlePageClick(page)}
                 className={`w-[32px] flex justify-center items-center py-1 border ${
                   filteredColorVariant?.colorVariant
-                    ? `${filteredColorVariant?.colorVariant} ${
+                    ? `${filteredColorVariant?.colorVariant?.substring(
+                        15,
+                        filteredColorVariant?.colorVariant?.length
+                      )} ${
                         page === currentPage
-                          ? null
+                          ? filteredColorVariant?.activeVariant
                           : filteredColorVariant?.hoverVariant
                       } ${filteredColorVariant?.backgroundVariant}`
                     : "border-cyan-500"
