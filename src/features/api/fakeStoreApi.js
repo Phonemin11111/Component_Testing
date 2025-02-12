@@ -15,7 +15,15 @@ export const fakeStoreApi = createApi({
       }),
       providesTags: ["fakeStoreApi"],
     }),
+    getDetailedItem: builder.query({
+      query: ({ id }) => ({
+        url: `products/${id}`,
+        method: "GET",
+      }),
+      providesTags: ["fakeStoreApi"],
+    }),
   }),
 });
 
-export const { useGetNormalItemListsQuery } = fakeStoreApi;
+export const { useGetNormalItemListsQuery, useGetDetailedItemQuery } =
+  fakeStoreApi;

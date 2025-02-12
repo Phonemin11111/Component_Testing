@@ -35,14 +35,11 @@ const SearchPage = ({ data }) => {
       setCurrentPage(pageNumber);
       setSearchParams(`?page=${pageNumber}`);
       setSearchPage("");
-      r;
     } else {
       setSearchPage("");
       alert("Invalid page number! Please search a page that is existed.");
     }
   };
-
-  console.log(filteredColorVariant?.colorVariant?.substring(0, 11));
 
   return (
     <div className=" w-full h-full flex flex-row items-center justify-center gap-1">

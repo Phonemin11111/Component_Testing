@@ -29,7 +29,7 @@ const ItemPerPage = ({ data }) => {
         <select
           name="selectItemsPerPage"
           id="selectItemsPerPage"
-          value={perPage}
+          value={String(perPage)}
           onChange={handleSelectChange}
           className={` text-cyan-900 border ${
             filteredColorVariant?.colorVariant

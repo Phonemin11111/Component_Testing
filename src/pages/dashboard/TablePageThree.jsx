@@ -2,11 +2,13 @@ import React, { useEffect, useState } from "react";
 import { useGetNormalItemListsQuery } from "../../features/api/fakeStoreApi";
 import TableGroup from "../../components/reuseableComponent/TableGroup";
 import TestTwo from "../../components/test/TestTwo";
+import { useNavigate } from "react-router";
 
 const TablePageThree = () => {
   const { data } = useGetNormalItemListsQuery();
   console.log(data);
   const currentItems = data;
+  const nav = useNavigate();
 
   const columns = [
     {
@@ -67,8 +69,8 @@ const TablePageThree = () => {
       key: "data",
       value: [
         {
-          label: "Edit",
-          onClick: (row) => handleAction(row, "edit"),
+          label: "Detail",
+          onClick: (row) => navigator(row),
           icon: "✎",
           iconFlexType: "vertical",
           gapBetween: 4,
@@ -89,6 +91,10 @@ const TablePageThree = () => {
 
   const handleAction = (row, actionType) => {
     console.log(actionType, "on row:", row);
+  };
+
+  const navigator = (row) => {
+    nav(`/cms-admin/tablePageDetail/${row.id}`);
   };
 
   const themeManager = [
@@ -121,7 +127,7 @@ const TablePageThree = () => {
     { key: "columns", value: columns },
     { key: "actions", value: actions },
     { key: "data", value: bodyData },
-    { key: "perPage", value: 2 },
+    { key: "perPage", value: currentItems?.length },
   ];
 
   return (
