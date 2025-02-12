@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useGetNormalItemListsQuery } from "../../features/api/fakeStoreApi";
 import TableGroup from "../../components/reuseableComponent/TableGroup";
+import TestTwo from "../../components/test/TestTwo";
 
 const TablePageThree = () => {
   const { data } = useGetNormalItemListsQuery();
@@ -125,7 +126,11 @@ const TablePageThree = () => {
 
   return (
     <div className=" flex flex-col w-full h-full gap-5">
-      <h1 className="text-xl font-bold mb-4">Item Table</h1>
+      <span className=" flex flex-row gap-5 items-center">
+        <h1 className="text-xl font-bold">Item Table</h1>
+        <TestTwo />
+      </span>
+
       <TableGroup
         data={tableData}
         frontendMode

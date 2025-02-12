@@ -13,7 +13,7 @@ const DashboardLayout = () => {
         <div className=" row-span-1 w-full h-full bg-white p-5">
           <DashboardHeader />
         </div>
-        <div className=" row-span-8 w-screen xl:w-full min-h-screen h-max bg-white p-5">
+        <div className=" row-span-8 w-screen xl:w-full min-h-[100%] h-max bg-white p-5">
           <Outlet />
         </div>
       </div>

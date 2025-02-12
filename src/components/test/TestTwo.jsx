@@ -1,50 +1,70 @@
-import React, { useRef, useState } from "react";
-import { createPortal } from "react-dom";
+import React, { useState } from "react";
 
 const TestTwo = () => {
-  const [dropdownType, setDropdownType] = useState(false);
-  const [position, setPosition] = useState({ top: 0, left: 0 });
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [position, setPosition] = useState({
+    vertical: "bottom",
+    horizontal: "left-1/2",
+  });
 
-  const buttonRef = useRef(null);
+  const handleDropdownClick = (e) => {
+    const button = e.currentTarget;
+    const buttonRect = button.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - buttonRect.bottom;
+    const container = button.offsetParent?.parentElement?.parentElement;
 
-  const handleDropdownClick = () => {
-    if (buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect();
-      setPosition({
-        top: rect.bottom + window.scrollY + 5, // Position below the button
-        left: rect.left + window.scrollX + rect.width / 2, // Center horizontally
-      });
+    if (!container) {
+      console.error("Container element not found!");
+      return;
     }
-    setDropdownType((prev) => !prev);
+
+    const containerRect = container.getBoundingClientRect();
+    const leftSpace = buttonRect.left - containerRect.left;
+    const rightSpace = containerRect.right - buttonRect.right;
+    const marginThreshold = 50;
+    const minSpaceBelow = 130;
+
+    let horizontalPosition;
+    if (leftSpace <= marginThreshold) {
+      horizontalPosition = "left-0";
+    } else if (rightSpace <= marginThreshold) {
+      horizontalPosition = "right-0";
+    } else {
+      horizontalPosition = "left-1/2";
+    }
+
+    const verticalPosition = spaceBelow >= minSpaceBelow ? "bottom" : "top";
+    setPosition({
+      vertical: verticalPosition,
+      horizontal: horizontalPosition,
+    });
+    setIsDropdownOpen((prev) => !prev);
   };
 
-  return (
-    <div className=" w-[3000px]">
-      <button
-        ref={buttonRef}
-        onClick={handleDropdownClick}
-        className="border p-2"
-      >
-        Click here
-      </button>
+  const horizontalClass =
+    position.horizontal === "left-1/2"
+      ? `${position.horizontal} transform -translate-x-1/2`
+      : position.horizontal;
+  const verticalClass =
+    position.vertical === "bottom" ? "top-full" : "bottom-full";
 
-      {dropdownType &&
-        createPortal(
+  return (
+    <div className="">
+      <div className="relative w-max bg-cyan-500">
+        <button onClick={handleDropdownClick} className="border p-2">
+          Click here
+        </button>
+
+        {isDropdownOpen && (
           <ul
-            className="absolute z-50 border p-2 bg-white shadow-md"
-            style={{
-              position: "absolute",
-              top: `${position.top}px`,
-              left: `${position.left}px`,
-              transform: "translateX(-50%)",
-            }}
+            className={`w-max absolute z-50 border p-2 ${verticalClass} ${horizontalClass} mt-1.5 bg-cyan-500`}
           >
             <li>Dropdown One</li>
             <li>Dropdown Two</li>
             <li>Dropdown Three</li>
-          </ul>,
-          document.body // Attach dropdown to the body
+          </ul>
         )}
+      </div>
     </div>
   );
 };
