@@ -30,6 +30,8 @@ const TablePageThree = () => {
         { header: "Price", key: "price" },
         { header: "Description", key: "description", icon: "📝" },
         { header: "Category", key: "category" },
+        { header: "Rating", key: "rating.rate" },
+        { header: "Rating", key: "rating.count" },
         { header: "Button", key: "button", action: "actions", icon: "📝" },
       ],
     },
@@ -122,12 +124,36 @@ const TablePageThree = () => {
     perPage: true,
   };
 
+  const merges = [
+    { key: "manager", value: [] },
+    {
+      key: "data",
+      value: [
+        { type: "header", startCol: 1, colSpan: 1, rowSpan: 1 },
+        { type: "header", startCol: 1, colSpan: 1, rowSpan: 1 },
+        { type: "body", startRow: 1, startCol: 1, colSpan: 1, rowSpan: 1 },
+        { type: "body", startRow: 1, startCol: 1, colSpan: 1, rowSpan: 1 },
+        {
+          type: "body",
+          startRow: 1,
+          startCol: 5,
+          colSpan: 3,
+          rowSpan: 1,
+          showData: 7,
+        },
+        { type: "footer", startCol: 0, colSpan: 5, rowSpan: 1 },
+        { type: "footer", startCol: 5, colSpan: 2, rowSpan: 1 },
+      ],
+    },
+  ];
+
   const tableData = [
     { key: "themeManager", value: themeManager },
     { key: "columns", value: columns },
     { key: "actions", value: actions },
     { key: "data", value: bodyData },
     { key: "perPage", value: currentItems?.length },
+    { key: "merges", value: merges },
   ];
 
   return (

@@ -153,6 +153,15 @@ const ReuseableTable = ({ data }) => {
   // ---------------------------
   // RENDERING
   // ---------------------------
+
+  const getNestedValue = (obj, key) =>
+    key
+      .split(".")
+      .reduce(
+        (acc, part) => (acc && acc[part] !== undefined ? acc[part] : ""),
+        obj
+      );
+
   return (
     <div>
       <div className="overflow-auto w-full custom-scrollbar">
@@ -261,7 +270,7 @@ const ReuseableTable = ({ data }) => {
                           "items-center justify-center"
                         }`}
                       >
-                        {row[col.key]}
+                        {getNestedValue(row, col.key)}
                       </span>
                     </td>
                   );
