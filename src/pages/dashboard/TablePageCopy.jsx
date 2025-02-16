@@ -1,17 +1,17 @@
 import React from "react";
 import { useGetNormalItemListsQuery } from "../../features/api/fakeStoreApi";
-import TableGroup from "../../components/reuseableComponent/TableGroup";
-import TestTwo from "../../components/test/TestTwo";
 import { useNavigate } from "react-router";
+import TableGroup from "../../components/reuseableComponent/TableGroup";
 
-const TablePageThree = () => {
+const TablePageCopy = () => {
   const { data } = useGetNormalItemListsQuery();
   console.log(data);
   const currentItems = data;
   const nav = useNavigate();
-  const totalSum = Number(
-    currentItems?.reduce((sum, item) => sum + item.price, 0).toFixed(3)
-  );
+  const newData = currentItems?.map((item) => ({
+    ...item,
+    rating: `${item.rating?.rate}/${item.rating?.count}`,
+  }));
 
   const columns = [
     {
@@ -21,27 +21,21 @@ const TablePageThree = () => {
           id: "columnsVariant",
           dataVariant:
             "bg-yellow-100 px-3 py-1 text-left text-sm font-medium text-yellow-900 border border-yellow-300",
-          dataPosition: "item-center justify-center gap-1",
+          dataPosition: "item-center justify-start gap-1",
         },
       ],
     },
     {
       key: "data",
       value: [
-        [
-          { header: "ID", key: "id" },
-          { header: "Name", key: "title" },
-          { header: "Price", key: "price" },
-          { header: "Description", key: "description", icon: "📝" },
-          { header: "Category", key: "category" },
-          { header: "Rating", key: "rating.rate" },
-          { header: "Rating", key: "rating.count" },
-          { header: "Button", key: "button", action: "actions", icon: "📝" },
-        ],
-        [
-          { header: "Rate", key: "rating.rate" },
-          { header: "Count", key: "rating.count" },
-        ],
+        { header: "ID", key: "id" },
+        { header: "Name", key: "title" },
+        { header: "Price", key: "price" },
+        { header: "Description", key: "description", icon: "📝" },
+        { header: "Category", key: "category" },
+        { header: "Rating", key: "rating" },
+        // { header: "Rating", key: "rating.count" },
+        { header: "Button", key: "button", action: "actions", icon: "📝" },
       ],
     },
   ];
@@ -60,38 +54,10 @@ const TablePageThree = () => {
     },
     {
       key: "data",
-      value: { data: currentItems, dataLength: currentItems?.length },
-    },
-  ];
-
-  const footers = [
-    {
-      key: "manager",
-      value: [
-        {
-          id: "footerVariant",
-          dataVariant:
-            "bg-gray-100 px-2 py-2 text-sm font-medium text-gray-900 border border-gray-300",
-          dataPosition: "item-center justify-center",
-        },
-      ],
-    },
-    {
-      key: "data",
-      value: [
-        [
-          { footer: "Total Price for this Page", key: "id" },
-          { footer: true, key: "price" },
-        ],
-        [
-          { footer: "Total Price for all Items", key: "id" },
-          { footer: totalSum, key: "description" },
-        ],
-        [
-          { footer: "Total Count", key: "id" },
-          { footer: currentItems?.length, key: "category" },
-        ],
-      ],
+      value: {
+        data: newData,
+        dataLength: currentItems?.length,
+      },
     },
   ];
 
@@ -139,6 +105,27 @@ const TablePageThree = () => {
     nav(`/cms-admin/tablePageDetail/${row.id}`);
   };
 
+  const footers = [
+    {
+      key: "manager",
+      value: [
+        {
+          id: "footerVariant",
+          dataVariant:
+            "bg-gray-100 px-2 py-2 text-sm font-medium text-gray-900 border border-gray-300",
+          dataPosition: "item-center justify-center",
+        },
+      ],
+    },
+    {
+      key: "data",
+      value: [
+        { footer: "Total Price", key: "id" },
+        { footer: true, key: "price" },
+      ],
+    },
+  ];
+
   const themeManager = [
     { key: "layoutVariant", value: [] },
     { key: "classVariant", value: [] },
@@ -169,30 +156,20 @@ const TablePageThree = () => {
     {
       key: "data",
       value: [
-        { type: "header", startCol: 0, colSpan: 1, rowSpan: 2 },
-        { type: "header", startCol: 1, colSpan: 1, rowSpan: 2 },
-        { type: "header", startCol: 2, colSpan: 1, rowSpan: 2 },
-        { type: "header", startCol: 3, colSpan: 1, rowSpan: 2 },
-        { type: "header", startCol: 4, colSpan: 1, rowSpan: 2 },
-        { type: "header", startCol: 5, colSpan: 2, rowSpan: 1 },
-        { type: "header", startCol: 7, colSpan: 1, rowSpan: 2 },
-        // { type: "body", startRow: 1, startCol: 1, colSpan: 1, rowSpan: 1 },
-        // { type: "body", startRow: 1, startCol: 1, colSpan: 1, rowSpan: 1 },
+        { type: "header", startCol: 1, colSpan: 1, rowSpan: 1 },
+        { type: "header", startCol: 1, colSpan: 1, rowSpan: 1 },
+        { type: "body", startRow: 1, startCol: 1, colSpan: 1, rowSpan: 1 },
+        { type: "body", startRow: 1, startCol: 1, colSpan: 1, rowSpan: 1 },
         // {
         //   type: "body",
-        //   startRow: 0,
+        //   startRow: 1,
         //   startCol: 5,
         //   colSpan: 2,
-        //   showData: [5, 6],
-        //   separator: "|",
-        //   applyToAllRows: true,
+        //   rowSpan: 1,
+        //   showData: 6,
         // },
         { type: "footer", startCol: 0, colSpan: 2, rowSpan: 1 },
-        { type: "footer", startCol: 2, colSpan: 6, rowSpan: 1 },
-        { type: "footer", startRow: 1, startCol: 0, colSpan: 3, rowSpan: 1 },
-        { type: "footer", startRow: 1, startCol: 3, colSpan: 6, rowSpan: 1 },
-        { type: "footer", startRow: 2, startCol: 0, colSpan: 4, rowSpan: 1 },
-        { type: "footer", startRow: 2, startCol: 4, colSpan: 4, rowSpan: 1 },
+        { type: "footer", startCol: 2, colSpan: 5, rowSpan: 1 },
       ],
     },
   ];
@@ -203,7 +180,7 @@ const TablePageThree = () => {
     { key: "actions", value: actions },
     { key: "footers", value: footers },
     { key: "data", value: bodyData },
-    { key: "perPage", value: currentItems?.length },
+    { key: "perPage", value: currentItems?.length / 4 },
     { key: "merges", value: merges },
   ];
 
@@ -211,7 +188,7 @@ const TablePageThree = () => {
     <div className=" flex flex-col w-full h-full gap-5">
       <span className=" flex flex-row gap-5 items-center">
         <h1 className="text-xl font-bold">Item Table</h1>
-        <TestTwo />
+        {/* <TestTwo /> */}
       </span>
 
       <TableGroup
@@ -223,4 +200,4 @@ const TablePageThree = () => {
   );
 };
 
-export default TablePageThree;
+export default TablePageCopy;
