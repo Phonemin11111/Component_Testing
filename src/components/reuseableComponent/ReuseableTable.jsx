@@ -23,6 +23,7 @@ const ReuseableTable = ({ data }) => {
     actions,
     merges,
     footers,
+    captionVariant: theme,
   } = tableDataObject;
 
   // Helper functions for extraction.
@@ -57,31 +58,42 @@ const ReuseableTable = ({ data }) => {
     ? footersDataRaw
     : [footersDataRaw];
 
-  // Compute total sum from table rows.
-  const totalSum = tableRows.reduce((sum, item) => sum + item.price, 0);
+  // Helper: Retrieve a nested value (e.g. "user.name") from an object.
+  const getNestedValue = (obj, key) => {
+    if (!key) return "";
+    return key
+      .split(".")
+      .reduce(
+        (acc, part) => (acc && acc[part] !== undefined ? acc[part] : ""),
+        obj
+      );
+  };
 
-  // Build footer map – if footer value is true, show computed totalSum.
   const processedFooterRows = footerRows.map((row) => {
-    // Check if the row contains an item where footer is true
-    const hasBooleanFooter = row.some((item) => item.footer === true);
-
-    if (hasBooleanFooter) {
-      // Process only the array with footer: true
-      return row.map((item) => ({
-        ...item,
-        footer:
-          item.footer === true ? Number(totalSum.toFixed(3)) : item.footer,
-      }));
-    } else {
-      // Return the raw array without modifications
-      return row;
-    }
+    return row.map((cell) => {
+      // If the cell indicates that it should display a computed sum...
+      if (cell.footer === true && cell.toSum) {
+        // Use cell.sumLimit if provided; otherwise sum all rows
+        const limit = cell.sumLimit || tableRows.length;
+        const total = tableRows
+          .slice(0, limit)
+          .reduce(
+            (sum, item) => sum + Number(getNestedValue(item, cell.toSum) || 0),
+            0
+          );
+        return { ...cell, footer: Number(total.toFixed(3)) };
+      }
+      return cell;
+    });
   });
 
   const totalBodyRows = tableRows.length;
 
   // Manager configurations.
   const captionManager = caption?.find((a) => a.key === "manager")?.value;
+  const themeManager = theme
+    ?.find((a) => a.key === "layoutVariant")
+    ?.value?.find((a) => a.id === "caption");
   const columnsManager = getSectionManager(columns, "columnsVariant");
   const bodyManager = getSectionManager(tableData, "bodyVariant");
   const actionsManager = getSectionManager(actions, "actionsVariant");
@@ -180,29 +192,19 @@ const ReuseableTable = ({ data }) => {
     return combined.join(" / ");
   };
 
-  // Helper: Retrieve a nested value (e.g. "user.name") from an object.
-  const getNestedValue = (obj, key) => {
-    if (!key) return "";
-    return key
-      .split(".")
-      .reduce(
-        (acc, part) => (acc && acc[part] !== undefined ? acc[part] : ""),
-        obj
-      );
-  };
-
   return (
     <div className="overflow-auto w-full custom-scrollbar">
       <table className="w-full table-auto border-collapse">
         {/* CAPTION */}
         <caption
           style={{
-            marginBottom: `${captionManager?.gapBelow || 10}px`,
+            marginBottom: `${themeManager?.gapBelow || 10}px`,
             fontSize: `${captionManager?.fontSize || "12"}px`,
             fontWeight: captionManager?.fontWeight || "normal",
+            captionSide: themeManager?.captionSide || "top",
           }}
           className={`${captionManager?.captionVariant || ""} ${
-            captionManager?.dataPosition || "text-center"
+            themeManager?.dataPosition || "text-center"
           }`}
         >
           {captionData}

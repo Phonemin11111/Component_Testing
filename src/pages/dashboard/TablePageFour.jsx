@@ -80,14 +80,14 @@ const TablePageFour = () => {
     {
       key: "manager",
       value: {
-        fontSize: 25,
+        fontSize: 30,
         fontWeight: "bold",
         captionVariant: "text-cyan-500",
       },
     },
     {
       key: "data",
-      value: "Item Table",
+      value: "Data Table",
     },
   ];
 
@@ -133,19 +133,16 @@ const TablePageFour = () => {
   const themeManager = [
     {
       key: "layoutVariant",
-      value: {
-        gapBetween: 5,
-        dataLayout: [
-          { id: "caption", dataPosition: "text-start", gapBelow: 30 },
-          {
-            id: "pagination",
-            dataPosition: "justify-center md:justify-end",
-            gapAbove: 20,
-            gapBetween: 18,
-            reverse: { X: false, Y: true },
-          },
-        ],
-      },
+      value: [
+        { id: "caption", dataPosition: "text-start", gapBelow: 30 },
+        {
+          id: "pagination",
+          dataPosition: "justify-center md:justify-end",
+          gapAbove: 20,
+          gapBetween: 18,
+          reverse: { X: false, Y: true },
+        },
+      ],
     },
     {
       key: "paginationVariant",
@@ -218,9 +215,9 @@ export default TablePageFour;
 //====================
 //1. Cell Manager {Text Background for status, cell width & height}
 //2. Action Separate Columns
-//3. Multi-Captions
-//4. Multi-Header rows/Add new cell
-//5. Multi-Footer rows/Add new cell
+//[Drop] 3. Multi-Captions
+//[done] 4. Multi-Header rows/Add new cell
+//[done] 5. Multi-Footer rows/Add new cell
 //6. Add New Body row/cell
 //7. Checkbox Columns
 //8. Colgroup/Advance Columns Manager

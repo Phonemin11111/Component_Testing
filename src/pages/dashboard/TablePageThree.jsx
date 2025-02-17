@@ -13,6 +13,21 @@ const TablePageThree = () => {
     currentItems?.reduce((sum, item) => sum + item.price, 0).toFixed(3)
   );
 
+  const caption = [
+    {
+      key: "manager",
+      value: {
+        fontSize: 25,
+        fontWeight: "bold",
+        captionVariant: "text-cyan-500",
+      },
+    },
+    {
+      key: "data",
+      value: "Item Table",
+    },
+  ];
+
   const columns = [
     {
       key: "manager",
@@ -80,8 +95,12 @@ const TablePageThree = () => {
       key: "data",
       value: [
         [
+          { footer: "Total Price for limited Sum", key: "id" },
+          { footer: true, sumLimit: 2, toSum: "price", key: "price" },
+        ],
+        [
           { footer: "Total Price for this Page", key: "id" },
-          { footer: true, key: "price" },
+          { footer: true, toSum: "price", key: "price" },
         ],
         [
           { footer: "Total Price for all Items", key: "id" },
@@ -140,8 +159,24 @@ const TablePageThree = () => {
   };
 
   const themeManager = [
-    { key: "layoutVariant", value: [] },
-    { key: "classVariant", value: [] },
+    {
+      key: "layoutVariant",
+      value: [
+        {
+          id: "caption",
+          captionSide: "top",
+          dataPosition: "text-end",
+          gapBelow: 20,
+        },
+        {
+          id: "pagination",
+          dataPosition: "justify-center md:justify-end",
+          gapAbove: 20,
+          gapBetween: 18,
+          reverse: { X: false, Y: true },
+        },
+      ],
+    },
     {
       key: "paginationVariant",
       value: [
@@ -189,15 +224,18 @@ const TablePageThree = () => {
         // },
         { type: "footer", startCol: 0, colSpan: 2, rowSpan: 1 },
         { type: "footer", startCol: 2, colSpan: 6, rowSpan: 1 },
-        { type: "footer", startRow: 1, startCol: 0, colSpan: 3, rowSpan: 1 },
-        { type: "footer", startRow: 1, startCol: 3, colSpan: 6, rowSpan: 1 },
-        { type: "footer", startRow: 2, startCol: 0, colSpan: 4, rowSpan: 1 },
-        { type: "footer", startRow: 2, startCol: 4, colSpan: 4, rowSpan: 1 },
+        { type: "footer", startRow: 1, startCol: 0, colSpan: 2, rowSpan: 1 },
+        { type: "footer", startRow: 1, startCol: 2, colSpan: 6, rowSpan: 1 },
+        { type: "footer", startRow: 2, startCol: 0, colSpan: 3, rowSpan: 1 },
+        { type: "footer", startRow: 2, startCol: 3, colSpan: 6, rowSpan: 1 },
+        { type: "footer", startRow: 3, startCol: 0, colSpan: 4, rowSpan: 1 },
+        { type: "footer", startRow: 3, startCol: 4, colSpan: 4, rowSpan: 1 },
       ],
     },
   ];
 
   const tableData = [
+    { key: "caption", value: caption },
     { key: "themeManager", value: themeManager },
     { key: "columns", value: columns },
     { key: "actions", value: actions },
@@ -209,11 +247,7 @@ const TablePageThree = () => {
 
   return (
     <div className=" flex flex-col w-full h-full gap-5">
-      <span className=" flex flex-row gap-5 items-center">
-        <h1 className="text-xl font-bold">Item Table</h1>
-        <TestTwo />
-      </span>
-
+      <TestTwo />
       <TableGroup
         data={tableData}
         frontendMode
