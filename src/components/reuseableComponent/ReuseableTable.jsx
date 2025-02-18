@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 const ReuseableTable = ({ data }) => {
   // Convert array of { key, value } items into an object.
@@ -48,10 +48,6 @@ const ReuseableTable = ({ data }) => {
     : [columnsDataRaw];
   // Use the first header row as the canonical columns.
   const canonicalColumns = headerRows[0];
-
-  // Identify columns (action column and data columns).
-  const actionColumn = canonicalColumns.find((col) => col.action);
-  const dataColumns = canonicalColumns.filter((col) => !col.action);
 
   // For footers, also support multi-row (if not, wrap in an array).
   const footerRows = Array.isArray(footersDataRaw[0])
@@ -156,7 +152,7 @@ const ReuseableTable = ({ data }) => {
 
     // Helper: return the column configuration.
     const getColumnConfigByIndex = (idx) =>
-      idx < dataColumns.length ? dataColumns[idx] : actionColumn || null;
+      idx < canonicalColumns.length ? canonicalColumns[idx] : null;
 
     // Build combined values (deduplicating repeated values).
     const combined = [];
@@ -164,8 +160,11 @@ const ReuseableTable = ({ data }) => {
       const colConfig = getColumnConfigByIndex(idx);
       if (!colConfig) return;
       let value = "";
-      if (colConfig === actionColumn) {
-        value = actionsData.map((a) => a.label).join(" ");
+      if (colConfig.action) {
+        // For action columns, if it’s the button type, combine labels
+        if (colConfig.action === "actions") {
+          value = actionsData.map((a) => a.label).join(" ");
+        }
       } else if (isHeader) {
         value = colConfig.header;
       } else if (isFooter) {
@@ -190,6 +189,107 @@ const ReuseableTable = ({ data }) => {
       return result;
     }
     return combined.join(" / ");
+  };
+
+  // ------------
+  // CHECKBOX LOGIC
+  // ------------
+  const [selectedRows, setSelectedRows] = useState([]);
+
+  const handleRowCheckboxChange = (rowId) => {
+    setSelectedRows((prev) =>
+      prev.includes(rowId)
+        ? prev.filter((id) => id !== rowId)
+        : [...prev, rowId]
+    );
+  };
+
+  // Helper to get a unique row identifier (fallback to row index)
+  const getRowId = (row, rowIndex) =>
+    row.id !== undefined ? row.id : rowIndex;
+
+  // ------------
+  // RENDERING HELPERS
+  // ------------
+  const renderHeaderCellContent = (cell, col, headerRowIndex) => {
+    // If this is a checkbox column (controlled via "checkMarks") and header cell is true,
+    // then render a "select all" checkbox.
+    if (col.action === "checkMarks") {
+      const allSelected =
+        tableRows.length > 0 &&
+        tableRows.every((row, rIndex) =>
+          selectedRows.includes(getRowId(row, rIndex))
+        );
+      return (
+        <input
+          className=" w-4 h-4"
+          type="checkbox"
+          checked={allSelected}
+          onChange={(e) => {
+            if (e.target.checked) {
+              setSelectedRows(
+                tableRows.map((row, rIndex) => getRowId(row, rIndex))
+              );
+            } else {
+              setSelectedRows([]);
+            }
+          }}
+        />
+      );
+    }
+    // Otherwise, use the header text or icon.
+    return cell.header || "";
+  };
+
+  const renderBodyCellContent = (row, rowIndex, col) => {
+    if (col.action) {
+      if (col.action === "checkMarks") {
+        const rowId = getRowId(row, rowIndex);
+        return (
+          <input
+            type="checkbox"
+            checked={selectedRows.includes(rowId)}
+            onChange={() => handleRowCheckboxChange(rowId)}
+            className=" w-4 h-4"
+          />
+        );
+      } else if (col.action === "actions") {
+        return (
+          <div
+            className={`flex ${
+              actionsManager?.dataPosition || "items-center justify-center"
+            } ${
+              actionsManager?.actionsFlexType === "horizontal"
+                ? "flex-row"
+                : "flex-col"
+            }`}
+            style={{ gap: `${actionsManager?.actionsBetween || 8}px` }}
+          >
+            {actionsData.map((action, actionIndex) => (
+              <button
+                key={actionIndex}
+                onClick={() => action.onClick && action.onClick(row)}
+                className={`flex items-center justify-center ${
+                  action.actionVariant || "text-gray-500 hover:text-gray-700"
+                } ${
+                  action.iconFlexType === "horizontal" ? "flex-row" : "flex-col"
+                }`}
+                style={{ gap: `${action.gapBetween || 4}px` }}
+              >
+                {action.icon && (
+                  <span className={action.iconVariant}>{action.icon}</span>
+                )}
+                {action.label}
+              </button>
+            ))}
+          </div>
+        );
+      }
+      // fallback for other action types
+      return "";
+    } else {
+      return getNestedValue(row, col.key);
+    }
   };
 
   return (
@@ -223,7 +323,11 @@ const ReuseableTable = ({ data }) => {
                   "header"
                 );
                 if (mergeResult === null) return null;
-                let content = cell.header || "";
+                let content = renderHeaderCellContent(
+                  cell,
+                  col,
+                  headerRowIndex
+                );
                 if (
                   mergeResult.mergeItem &&
                   Array.isArray(mergeResult.mergeItem.showData)
@@ -235,11 +339,10 @@ const ReuseableTable = ({ data }) => {
                     false
                   );
                 }
-                const { props: mergeProps } = mergeResult;
                 return (
                   <th
                     key={colIndex}
-                    {...mergeProps}
+                    {...mergeResult.props}
                     className={`${
                       columnsManager?.dataVariant ||
                       "px-4 py-2 text-left text-sm font-medium text-gray-700 border border-cyan-300"
@@ -265,14 +368,14 @@ const ReuseableTable = ({ data }) => {
         <tbody>
           {tableRows.map((row, rowIndex) => (
             <tr key={rowIndex}>
-              {dataColumns.map((col, colIndex) => {
+              {canonicalColumns.map((col, colIndex) => {
                 const mergeResult = getMergeAttributes(
                   rowIndex,
                   colIndex,
                   "body"
                 );
                 if (mergeResult === null) return null;
-                let content = getNestedValue(row, col.key);
+                let content = renderBodyCellContent(row, rowIndex, col);
                 if (
                   mergeResult.mergeItem &&
                   Array.isArray(mergeResult.mergeItem.showData)
@@ -284,11 +387,10 @@ const ReuseableTable = ({ data }) => {
                     false
                   );
                 }
-                const { props: mergeProps } = mergeResult;
                 return (
                   <td
                     key={colIndex}
-                    {...mergeProps}
+                    {...mergeResult.props}
                     className={`${
                       bodyManager?.dataVariant ||
                       "px-4 py-2 text-sm text-gray-600 border border-cyan-300"
@@ -305,64 +407,6 @@ const ReuseableTable = ({ data }) => {
                   </td>
                 );
               })}
-              {actionColumn &&
-                (() => {
-                  const mergeResult = getMergeAttributes(
-                    rowIndex,
-                    dataColumns.length,
-                    "body"
-                  );
-                  if (mergeResult === null) return null;
-                  const { props: mergeProps } = mergeResult;
-                  return (
-                    <td
-                      {...mergeProps}
-                      className={`${
-                        bodyManager?.dataVariant ||
-                        "px-4 py-2 text-sm text-gray-600 border border-cyan-300"
-                      }`}
-                    >
-                      <div
-                        className={`flex ${
-                          actionsManager?.dataPosition ||
-                          "items-center justify-center"
-                        } ${
-                          actionsManager?.actionsFlexType === "horizontal"
-                            ? "flex-row"
-                            : "flex-col"
-                        }`}
-                        style={{
-                          gap: `${actionsManager?.actionsBetween || 8}px`,
-                        }}
-                      >
-                        {actionsData.map((action, actionIndex) => (
-                          <button
-                            key={actionIndex}
-                            onClick={() =>
-                              action.onClick && action.onClick(row)
-                            }
-                            className={`flex items-center justify-center ${
-                              action.actionVariant ||
-                              "text-gray-500 hover:text-gray-700"
-                            } ${
-                              action.iconFlexType === "horizontal"
-                                ? "flex-row"
-                                : "flex-col"
-                            }`}
-                            style={{ gap: `${action.gapBetween || 4}px` }}
-                          >
-                            {action.icon && (
-                              <span className={action.iconVariant}>
-                                {action.icon}
-                              </span>
-                            )}
-                            {action.label}
-                          </button>
-                        ))}
-                      </div>
-                    </td>
-                  );
-                })()}
             </tr>
           ))}
         </tbody>
@@ -372,7 +416,7 @@ const ReuseableTable = ({ data }) => {
           <tfoot className={`${footersManager?.dataVariant || "bg-cyan-100"}`}>
             {processedFooterRows.map((row, footerRowIndex) => (
               <tr key={`footer-${footerRowIndex}`}>
-                {dataColumns.map((col, colIndex) => {
+                {canonicalColumns.map((col, colIndex) => {
                   const mergeResult = getMergeAttributes(
                     footerRowIndex,
                     colIndex,
@@ -392,11 +436,10 @@ const ReuseableTable = ({ data }) => {
                       true
                     );
                   }
-                  const { props: mergeProps } = mergeResult;
                   return (
                     <td
                       key={colIndex}
-                      {...mergeProps}
+                      {...mergeResult.props}
                       className={`${
                         footersManager?.dataVariant ||
                         "px-4 py-2 text-left text-sm font-medium text-gray-700 border border-cyan-300"
@@ -413,27 +456,6 @@ const ReuseableTable = ({ data }) => {
                     </td>
                   );
                 })}
-                {actionColumn &&
-                  (() => {
-                    const mergeResult = getMergeAttributes(
-                      footerRowIndex,
-                      dataColumns.length,
-                      "footer"
-                    );
-                    if (mergeResult === null) return null;
-                    const { props: mergeProps } = mergeResult;
-                    return (
-                      <td
-                        {...mergeProps}
-                        className={`${
-                          footersManager?.dataVariant ||
-                          "px-4 py-2 text-left text-sm font-medium text-gray-700 border border-cyan-300"
-                        }`}
-                      >
-                        {processedFooterRows[actionColumn?.key] || ""}
-                      </td>
-                    );
-                  })()}
               </tr>
             ))}
           </tfoot>

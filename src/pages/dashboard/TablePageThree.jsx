@@ -44,6 +44,7 @@ const TablePageThree = () => {
       key: "data",
       value: [
         [
+          { header: true, key: "checkBox", action: "checkMarks" },
           { header: "ID", key: "id" },
           { header: "Name", key: "title" },
           { header: "Price", key: "price" },
@@ -87,7 +88,7 @@ const TablePageThree = () => {
           id: "footerVariant",
           dataVariant:
             "bg-gray-100 px-2 py-2 text-sm font-medium text-gray-900 border border-gray-300",
-          dataPosition: "item-center justify-center",
+          dataPosition: "item-center justify-end",
         },
       ],
     },
@@ -95,19 +96,19 @@ const TablePageThree = () => {
       key: "data",
       value: [
         [
-          { footer: "Total Price for limited Sum", key: "id" },
+          { footer: "Total Price for limited Sum", key: "checkBox" },
           { footer: true, sumLimit: 2, toSum: "price", key: "price" },
         ],
         [
-          { footer: "Total Price for this Page", key: "id" },
+          { footer: "Total Price for this Page", key: "checkBox" },
           { footer: true, toSum: "price", key: "price" },
         ],
         [
-          { footer: "Total Price for all Items", key: "id" },
+          { footer: "Total Price for all Items", key: "checkBox" },
           { footer: totalSum, key: "description" },
         ],
         [
-          { footer: "Total Count", key: "id" },
+          { footer: "Total Count", key: "checkBox" },
           { footer: currentItems?.length, key: "category" },
         ],
       ],
@@ -209,8 +210,9 @@ const TablePageThree = () => {
         { type: "header", startCol: 2, colSpan: 1, rowSpan: 2 },
         { type: "header", startCol: 3, colSpan: 1, rowSpan: 2 },
         { type: "header", startCol: 4, colSpan: 1, rowSpan: 2 },
-        { type: "header", startCol: 5, colSpan: 2, rowSpan: 1 },
-        { type: "header", startCol: 7, colSpan: 1, rowSpan: 2 },
+        { type: "header", startCol: 5, colSpan: 1, rowSpan: 2 },
+        { type: "header", startCol: 6, colSpan: 2, rowSpan: 1 },
+        { type: "header", startCol: 8, colSpan: 1, rowSpan: 2 },
         // { type: "body", startRow: 1, startCol: 1, colSpan: 1, rowSpan: 1 },
         // { type: "body", startRow: 1, startCol: 1, colSpan: 1, rowSpan: 1 },
         // {
@@ -222,14 +224,14 @@ const TablePageThree = () => {
         //   separator: "|",
         //   applyToAllRows: true,
         // },
-        { type: "footer", startCol: 0, colSpan: 2, rowSpan: 1 },
-        { type: "footer", startCol: 2, colSpan: 6, rowSpan: 1 },
-        { type: "footer", startRow: 1, startCol: 0, colSpan: 2, rowSpan: 1 },
-        { type: "footer", startRow: 1, startCol: 2, colSpan: 6, rowSpan: 1 },
-        { type: "footer", startRow: 2, startCol: 0, colSpan: 3, rowSpan: 1 },
-        { type: "footer", startRow: 2, startCol: 3, colSpan: 6, rowSpan: 1 },
-        { type: "footer", startRow: 3, startCol: 0, colSpan: 4, rowSpan: 1 },
-        { type: "footer", startRow: 3, startCol: 4, colSpan: 4, rowSpan: 1 },
+        { type: "footer", startCol: 0, colSpan: 3, rowSpan: 1 },
+        { type: "footer", startCol: 3, colSpan: 6, rowSpan: 1 },
+        { type: "footer", startRow: 1, startCol: 0, colSpan: 3, rowSpan: 1 },
+        { type: "footer", startRow: 1, startCol: 3, colSpan: 6, rowSpan: 1 },
+        { type: "footer", startRow: 2, startCol: 0, colSpan: 4, rowSpan: 1 },
+        { type: "footer", startRow: 2, startCol: 4, colSpan: 6, rowSpan: 1 },
+        { type: "footer", startRow: 3, startCol: 0, colSpan: 5, rowSpan: 1 },
+        { type: "footer", startRow: 3, startCol: 5, colSpan: 4, rowSpan: 1 },
       ],
     },
   ];
