@@ -24,7 +24,30 @@ const ReuseableTable = ({ data }) => {
     merges,
     footers,
     captionVariant: theme,
+    rolePermissions,
+    roleLevel,
   } = tableDataObject;
+
+  const currentRole = (rolePermissions && rolePermissions[roleLevel]) || {
+    viewColumns: "all",
+    allowActions: true,
+    allowCheckbox: true,
+  };
+
+  // Helper: Decide if a given column should be rendered based on permissions.
+  const isColumnAllowed = (col) => {
+    // If viewColumns is an array, only show columns whose key is in the array.
+    if (
+      currentRole.viewColumns !== "all" &&
+      Array.isArray(currentRole.viewColumns)
+    ) {
+      return currentRole.viewColumns.includes(col.key);
+    }
+    // For checkboxes or actions, verify permission.
+    if (!currentRole.allowCheckbox && col.action === "checkMarks") return false;
+    if (!currentRole.allowActions && col.action === "actions") return false;
+    return true;
+  };
 
   // Helper functions for extraction.
   const getSectionData = (section) =>
@@ -42,14 +65,14 @@ const ReuseableTable = ({ data }) => {
   const actionsData = getSectionData(actions);
   const tableRows = tableData?.find((d) => d.key === "data")?.value?.data || [];
 
-  // Handle multi-row headers:
+  // Handle multi-row headers.
   const headerRows = Array.isArray(columnsDataRaw[0])
     ? columnsDataRaw
     : [columnsDataRaw];
   // Use the first header row as the canonical columns.
   const canonicalColumns = headerRows[0];
 
-  // For footers, also support multi-row (if not, wrap in an array).
+  // For footers, support multi-row.
   const footerRows = Array.isArray(footersDataRaw[0])
     ? footersDataRaw
     : [footersDataRaw];
@@ -67,17 +90,20 @@ const ReuseableTable = ({ data }) => {
 
   const processedFooterRows = footerRows.map((row) => {
     return row.map((cell) => {
-      // If the cell indicates that it should display a computed sum...
       if (cell.footer === true && cell.toSum) {
-        // Use cell.sumLimit if provided; otherwise sum all rows
-        const limit = cell.sumLimit || tableRows.length;
-        const total = tableRows
-          .slice(0, limit)
-          .reduce(
-            (sum, item) => sum + Number(getNestedValue(item, cell.toSum) || 0),
-            0
+        let rowsToSum = tableRows;
+        if (cell.sumOnly && Array.isArray(cell.sumOnly)) {
+          rowsToSum = tableRows.filter((_, index) =>
+            cell.sumOnly.includes(index)
           );
-        return { ...cell, footer: Number(total.toFixed(3)) };
+        } else if (cell.sumLimit) {
+          rowsToSum = tableRows.slice(0, cell.sumLimit);
+        }
+        const total = rowsToSum.reduce(
+          (sum, item) => sum + Number(getNestedValue(item, cell.toSum) || 0),
+          0
+        );
+        return { ...cell, footer: Number(total.toFixed(3)).toLocaleString() };
       }
       return cell;
     });
@@ -111,7 +137,6 @@ const ReuseableTable = ({ data }) => {
     );
     if (!mergeItem) return { props: {} };
 
-    // If applyToAllRows flag is set in a body merge, render the merged cell in every row at the starting column.
     if (section === "body" && mergeItem.applyToAllRows) {
       if (colIndex === mergeItem.startCol) {
         return { props: { colSpan: mergeItem.colSpan, rowSpan: 1 }, mergeItem };
@@ -119,7 +144,6 @@ const ReuseableTable = ({ data }) => {
       return null;
     }
 
-    // Otherwise, render the merged cell only once at the designated display column.
     const designatedCol = Array.isArray(mergeItem.showData)
       ? mergeItem.showData[0]
       : mergeItem.showData ?? mergeItem.startCol;
@@ -150,18 +174,15 @@ const ReuseableTable = ({ data }) => {
         idx < mergeItem.startCol + mergeItem.colSpan
     );
 
-    // Helper: return the column configuration.
     const getColumnConfigByIndex = (idx) =>
       idx < canonicalColumns.length ? canonicalColumns[idx] : null;
 
-    // Build combined values (deduplicating repeated values).
     const combined = [];
     indices.forEach((idx) => {
       const colConfig = getColumnConfigByIndex(idx);
       if (!colConfig) return;
       let value = "";
       if (colConfig.action) {
-        // For action columns, if it’s the button type, combine labels
         if (colConfig.action === "actions") {
           value = actionsData.map((a) => a.label).join(" ");
         }
@@ -204,7 +225,6 @@ const ReuseableTable = ({ data }) => {
     );
   };
 
-  // Helper to get a unique row identifier (fallback to row index)
   const getRowId = (row, rowIndex) =>
     row.id !== undefined ? row.id : rowIndex;
 
@@ -212,9 +232,8 @@ const ReuseableTable = ({ data }) => {
   // RENDERING HELPERS
   // ------------
   const renderHeaderCellContent = (cell, col, headerRowIndex) => {
-    // If this is a checkbox column (controlled via "checkMarks") and header cell is true,
-    // then render a "select all" checkbox.
     if (col.action === "checkMarks") {
+      if (!currentRole.allowCheckbox) return "";
       const allSelected =
         tableRows.length > 0 &&
         tableRows.every((row, rIndex) =>
@@ -222,7 +241,7 @@ const ReuseableTable = ({ data }) => {
         );
       return (
         <input
-          className=" w-4 h-4"
+          className="w-4 h-4"
           type="checkbox"
           checked={allSelected}
           onChange={(e) => {
@@ -237,23 +256,32 @@ const ReuseableTable = ({ data }) => {
         />
       );
     }
-    // Otherwise, use the header text or icon.
     return cell.header || "";
   };
 
   const renderBodyCellContent = (row, rowIndex, col) => {
     if (col.action) {
       if (col.action === "checkMarks") {
+        if (!currentRole.allowCheckbox) return null;
         const rowId = getRowId(row, rowIndex);
         return (
           <input
             type="checkbox"
             checked={selectedRows.includes(rowId)}
             onChange={() => handleRowCheckboxChange(rowId)}
-            className=" w-4 h-4"
+            className="w-4 h-4"
           />
         );
       } else if (col.action === "actions") {
+        if (!currentRole.allowActions) return null;
+        let filteredActions = actionsData;
+        // If allowActions is an array of allowed labels, filter actions accordingly.
+        if (Array.isArray(currentRole.allowActions)) {
+          filteredActions = actionsData.filter(
+            (action) =>
+              action.label && currentRole.allowActions.includes(action.label)
+          );
+        }
         return (
           <div
             className={`flex ${
@@ -265,7 +293,7 @@ const ReuseableTable = ({ data }) => {
             }`}
             style={{ gap: `${actionsManager?.actionsBetween || 8}px` }}
           >
-            {actionsData.map((action, actionIndex) => (
+            {filteredActions.map((action, actionIndex) => (
               <button
                 key={actionIndex}
                 onClick={() => action.onClick && action.onClick(row)}
@@ -285,10 +313,13 @@ const ReuseableTable = ({ data }) => {
           </div>
         );
       }
-      // fallback for other action types
       return "";
     } else {
-      return getNestedValue(row, col.key);
+      let value = getNestedValue(row, col.key);
+      if (!isNaN(value) && value !== "" && value !== null) {
+        value = Number(value).toLocaleString();
+      }
+      return value;
     }
   };
 
@@ -315,7 +346,7 @@ const ReuseableTable = ({ data }) => {
           {headerRows.map((row, headerRowIndex) => (
             <tr key={`header-${headerRowIndex}`}>
               {canonicalColumns.map((col, colIndex) => {
-                // Find the matching cell in the current header row by key.
+                if (!isColumnAllowed(col)) return null;
                 const cell = row.find((c) => c.key === col.key) || {};
                 const mergeResult = getMergeAttributes(
                   headerRowIndex,
@@ -369,6 +400,7 @@ const ReuseableTable = ({ data }) => {
           {tableRows.map((row, rowIndex) => (
             <tr key={rowIndex}>
               {canonicalColumns.map((col, colIndex) => {
+                if (!isColumnAllowed(col)) return null;
                 const mergeResult = getMergeAttributes(
                   rowIndex,
                   colIndex,
@@ -412,54 +444,58 @@ const ReuseableTable = ({ data }) => {
         </tbody>
 
         {/* FOOTER */}
-        {footerRows.length > 0 && (
-          <tfoot className={`${footersManager?.dataVariant || "bg-cyan-100"}`}>
-            {processedFooterRows.map((row, footerRowIndex) => (
-              <tr key={`footer-${footerRowIndex}`}>
-                {canonicalColumns.map((col, colIndex) => {
-                  const mergeResult = getMergeAttributes(
-                    footerRowIndex,
-                    colIndex,
-                    "footer"
-                  );
-                  if (mergeResult === null) return null;
-                  const cell = row.find((c) => c.key === col.key) || {};
-                  let content = cell.footer || "";
-                  if (
-                    mergeResult.mergeItem &&
-                    Array.isArray(mergeResult.mergeItem.showData)
-                  ) {
-                    content = getCombinedContent(
-                      null,
-                      mergeResult.mergeItem,
-                      false,
-                      true
-                    );
+        {processedFooterRows.map((row, footerRowIndex) => (
+          <tr key={`footer-${footerRowIndex}`}>
+            {canonicalColumns.map((col, colIndex) => {
+              if (!isColumnAllowed(col)) return null;
+              const mergeResult = getMergeAttributes(
+                footerRowIndex,
+                colIndex,
+                "footer"
+              );
+              if (mergeResult === null) return null;
+              // Use the footer cell's key: if it’s a number, compare with the column index.
+              const cell =
+                row.find((c) => {
+                  if (typeof c.key === "number") {
+                    return c.key === colIndex;
                   }
-                  return (
-                    <td
-                      key={colIndex}
-                      {...mergeResult.props}
-                      className={`${
-                        footersManager?.dataVariant ||
-                        "px-4 py-2 text-left text-sm font-medium text-gray-700 border border-cyan-300"
-                      }`}
-                    >
-                      <span
-                        className={`flex flex-row ${
-                          footersManager?.dataPosition ||
-                          "items-center justify-center"
-                        }`}
-                      >
-                        {content}
-                      </span>
-                    </td>
-                  );
-                })}
-              </tr>
-            ))}
-          </tfoot>
-        )}
+                  return c.key === col.key;
+                }) || {};
+              let content = cell.footer || "";
+              if (
+                mergeResult.mergeItem &&
+                Array.isArray(mergeResult.mergeItem.showData)
+              ) {
+                content = getCombinedContent(
+                  null,
+                  mergeResult.mergeItem,
+                  false,
+                  true
+                );
+              }
+              return (
+                <td
+                  key={colIndex}
+                  {...mergeResult.props}
+                  className={`${
+                    footersManager?.dataVariant ||
+                    "px-4 py-2 text-left text-sm font-medium text-gray-700 border border-cyan-300"
+                  }`}
+                >
+                  <span
+                    className={`flex flex-row ${
+                      footersManager?.dataPosition ||
+                      "items-center justify-center"
+                    }`}
+                  >
+                    {content}
+                  </span>
+                </td>
+              );
+            })}
+          </tr>
+        ))}
       </table>
     </div>
   );

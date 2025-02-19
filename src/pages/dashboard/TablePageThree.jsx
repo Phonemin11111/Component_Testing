@@ -96,20 +96,24 @@ const TablePageThree = () => {
       key: "data",
       value: [
         [
-          { footer: "Total Price for limited Sum", key: "checkBox" },
-          { footer: true, sumLimit: 2, toSum: "price", key: "price" },
+          { footer: "Total Price for limited Sum", key: 0 },
+          { footer: true, sumLimit: 2, toSum: "price", key: 3 },
         ],
         [
-          { footer: "Total Price for this Page", key: "checkBox" },
-          { footer: true, toSum: "price", key: "price" },
+          { footer: "Total Price for only chosen", key: 0 },
+          { footer: true, sumOnly: [0, 1, 2, 9], toSum: "price", key: 3 },
         ],
         [
-          { footer: "Total Price for all Items", key: "checkBox" },
-          { footer: totalSum, key: "description" },
+          { footer: "Total Price for this Page", key: 0 },
+          { footer: true, toSum: "price", key: 3 },
         ],
         [
-          { footer: "Total Count", key: "checkBox" },
-          { footer: currentItems?.length, key: "category" },
+          { footer: "Total Price for all Items", key: 0 },
+          { footer: totalSum?.toLocaleString(), key: 4 },
+        ],
+        [
+          { footer: "Total Count", key: 0 },
+          { footer: currentItems?.length, key: 5 },
         ],
       ],
     },
@@ -228,11 +232,38 @@ const TablePageThree = () => {
         { type: "footer", startCol: 3, colSpan: 6, rowSpan: 1 },
         { type: "footer", startRow: 1, startCol: 0, colSpan: 3, rowSpan: 1 },
         { type: "footer", startRow: 1, startCol: 3, colSpan: 6, rowSpan: 1 },
-        { type: "footer", startRow: 2, startCol: 0, colSpan: 4, rowSpan: 1 },
-        { type: "footer", startRow: 2, startCol: 4, colSpan: 6, rowSpan: 1 },
-        { type: "footer", startRow: 3, startCol: 0, colSpan: 5, rowSpan: 1 },
-        { type: "footer", startRow: 3, startCol: 5, colSpan: 4, rowSpan: 1 },
+        { type: "footer", startRow: 2, startCol: 0, colSpan: 3, rowSpan: 1 },
+        { type: "footer", startRow: 2, startCol: 3, colSpan: 6, rowSpan: 1 },
+        { type: "footer", startRow: 3, startCol: 0, colSpan: 4, rowSpan: 1 },
+        { type: "footer", startRow: 3, startCol: 4, colSpan: 6, rowSpan: 1 },
+        { type: "footer", startRow: 4, startCol: 0, colSpan: 5, rowSpan: 1 },
+        { type: "footer", startRow: 4, startCol: 5, colSpan: 4, rowSpan: 1 },
       ],
+    },
+  ];
+
+  const access = [
+    { key: "role", value: "sales" },
+    {
+      key: "permission",
+      value: {
+        admin: { viewColumns: "all", allowActions: true, allowCheckbox: true },
+        sales: {
+          viewColumns: "all",
+          allowActions: ["Detail"],
+          allowCheckbox: true,
+        },
+        viewOnly: {
+          viewColumns: "all",
+          allowActions: false,
+          allowCheckbox: false,
+        },
+        customer: {
+          viewColumns: ["id", "title", "price"],
+          allowActions: false,
+          allowCheckbox: false,
+        },
+      },
     },
   ];
 
@@ -245,6 +276,7 @@ const TablePageThree = () => {
     { key: "data", value: bodyData },
     { key: "perPage", value: currentItems?.length },
     { key: "merges", value: merges },
+    { key: "access", value: access },
   ];
 
   return (
