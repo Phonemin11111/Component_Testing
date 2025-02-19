@@ -12,7 +12,6 @@ const TableGroup = ({ data, frontendMode, paginationCore }) => {
     })
   );
 
-  const access = tableData?.access;
   const theme = tableData?.themeManager;
   const items = tableData.data;
   const filteredTableData = items?.find((b) => b.key === "data")?.value || [];
@@ -26,14 +25,11 @@ const TableGroup = ({ data, frontendMode, paginationCore }) => {
   const parentSetCurrentPage = filteredTableData.setCurrentPage;
 
   const filteredLayoutVariant = theme?.find((a) => a.key === "layoutVariant")
-    ?.value?.dataLayout;
+    ?.value;
 
   const paginationPosition = filteredLayoutVariant?.find(
     (a) => a.id === "pagination"
   );
-
-  const filteredRoles = access?.find((a) => a.key === "role").value;
-  const filteredPermissions = access?.find((a) => a.key === "permission").value;
 
   useEffect(() => {
     const pageParam = searchParams.get("page");
@@ -104,8 +100,7 @@ const TableGroup = ({ data, frontendMode, paginationCore }) => {
       value: frontendMode ? modifiedBodyData || [] : tableData.data || [],
     },
     { key: "merges", value: tableData.merges || [] },
-    { key: "rolePermissions", value: filteredPermissions || [] },
-    { key: "roleLevel", value: filteredRoles || [] },
+    { key: "access", value: tableData.access || [] },
     {
       key: "captionVariant",
       value: tableData.themeManager || [],

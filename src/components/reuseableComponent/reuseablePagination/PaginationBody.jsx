@@ -19,7 +19,7 @@ const PaginationBody = ({ data }) => {
 
   const filteredColorVariant = colorVariant
     ?.find((a) => a.key === "paginationVariant")
-    ?.value?.find((a) => a.id === "colorScheme");
+    ?.value?.find((a) => a.id === "colorVariant");
 
   const [dropdownType, setDropdownType] = useState(null);
   const [position, setPosition] = useState("bottom");

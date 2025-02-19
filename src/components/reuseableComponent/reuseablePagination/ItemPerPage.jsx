@@ -17,7 +17,7 @@ const ItemPerPage = ({ data }) => {
   const colorVariant = paginationDataObject?.paginationVariant;
   const filteredColorVariant = colorVariant
     ?.find((a) => a.key === "paginationVariant")
-    ?.value?.find((a) => a.id === "colorScheme");
+    ?.value?.find((a) => a.id === "colorVariant");
 
   const handleSelectChange = (event) => {
     setPerPage(parseInt(event.target.value));

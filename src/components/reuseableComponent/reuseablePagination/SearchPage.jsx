@@ -19,7 +19,7 @@ const SearchPage = ({ data }) => {
   const setCurrentPage = paginationDataObject?.setCurrentPage;
   const filteredColorVariant = colorVariant
     ?.find((a) => a.key === "paginationVariant")
-    ?.value?.find((a) => a.id === "colorScheme");
+    ?.value?.find((a) => a.id === "colorVariant");
 
   const [searchPage, setSearchPage] = useState("");
 
@@ -50,11 +50,8 @@ const SearchPage = ({ data }) => {
           filteredColorVariant?.colorVariant
             ? filteredColorVariant?.colorVariant
             : "text-cyan-900"
-        } ${
-          filteredColorVariant?.buttonVariant
-            ? `${filteredColorVariant?.buttonVariant}`
-            : "hover:text-cyan-600"
-        }`}
+        } hover:opacity-75 active:opacity-90
+        `}
       >
         Page,
       </button>

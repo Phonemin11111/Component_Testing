@@ -24,9 +24,11 @@ const ReuseableTable = ({ data }) => {
     merges,
     footers,
     captionVariant: theme,
-    rolePermissions,
-    roleLevel,
+    access,
   } = tableDataObject;
+
+  const roleLevel = access?.find((a) => a.key === "role").value;
+  const rolePermissions = access?.find((a) => a.key === "permission").value;
 
   const currentRole = (rolePermissions && rolePermissions[roleLevel]) || {
     viewColumns: "all",
@@ -36,14 +38,12 @@ const ReuseableTable = ({ data }) => {
 
   // Helper: Decide if a given column should be rendered based on permissions.
   const isColumnAllowed = (col) => {
-    // If viewColumns is an array, only show columns whose key is in the array.
     if (
       currentRole.viewColumns !== "all" &&
       Array.isArray(currentRole.viewColumns)
     ) {
       return currentRole.viewColumns.includes(col.key);
     }
-    // For checkboxes or actions, verify permission.
     if (!currentRole.allowCheckbox && col.action === "checkMarks") return false;
     if (!currentRole.allowActions && col.action === "actions") return false;
     return true;
@@ -69,7 +69,6 @@ const ReuseableTable = ({ data }) => {
   const headerRows = Array.isArray(columnsDataRaw[0])
     ? columnsDataRaw
     : [columnsDataRaw];
-  // Use the first header row as the canonical columns.
   const canonicalColumns = headerRows[0];
 
   // For footers, support multi-row.
@@ -88,9 +87,11 @@ const ReuseableTable = ({ data }) => {
       );
   };
 
+  // Process static footer cells (if footer === true and has toSum)
+  // Leave the ones with sumChecked for click handling.
   const processedFooterRows = footerRows.map((row) => {
     return row.map((cell) => {
-      if (cell.footer === true && cell.toSum) {
+      if (!cell.sumChecked && cell.footer === true && cell.toSum) {
         let rowsToSum = tableRows;
         if (cell.sumOnly && Array.isArray(cell.sumOnly)) {
           rowsToSum = tableRows.filter((_, index) =>
@@ -107,6 +108,15 @@ const ReuseableTable = ({ data }) => {
       }
       return cell;
     });
+  });
+
+  // Build a map of footer cells that are meant for summing
+  // These are the cells with sumChecked: true.
+  const sumConfigs = {};
+  processedFooterRows.flat().forEach((cell) => {
+    if (cell.sumChecked) {
+      sumConfigs[cell.key] = cell;
+    }
   });
 
   const totalBodyRows = tableRows.length;
@@ -215,18 +225,50 @@ const ReuseableTable = ({ data }) => {
   // ------------
   // CHECKBOX LOGIC
   // ------------
+  // We now store full row objects rather than just IDs.
   const [selectedRows, setSelectedRows] = useState([]);
-
-  const handleRowCheckboxChange = (rowId) => {
-    setSelectedRows((prev) =>
-      prev.includes(rowId)
-        ? prev.filter((id) => id !== rowId)
-        : [...prev, rowId]
-    );
-  };
+  // computedSums holds the calculated sum for each key.
+  const [computedSums, setComputedSums] = useState({});
 
   const getRowId = (row, rowIndex) =>
     row.id !== undefined ? row.id : rowIndex;
+
+  const handleRowCheckboxChange = (row, rowIndex) => {
+    const rowKey = getRowId(row, rowIndex);
+    setSelectedRows((prev) =>
+      prev.some((selected) => getRowId(selected, rowIndex) === rowKey)
+        ? prev.filter((selected) => getRowId(selected, rowIndex) !== rowKey)
+        : [...prev, row]
+    );
+  };
+
+  // Header checkbox: check if every row is selected.
+  const allSelected =
+    tableRows.length > 0 &&
+    tableRows.every((row, rowIndex) =>
+      selectedRows.some(
+        (selected) => getRowId(selected, rowIndex) === getRowId(row, rowIndex)
+      )
+    );
+
+  // ------------
+  // SUM ON CLICK FOR FOOTER CELLS
+  // ------------
+  // When the clickable button cell is pressed (the one without sumChecked),
+  // we sum over the selected rows using the 'toSum' field from the configuration
+  // of the cell with sumChecked. The computed sum is then stored keyed by cell.key.
+  const handleSumClick = (key) => {
+    const config = sumConfigs[key];
+    if (!config || !config.toSum) return;
+    const sum = selectedRows.reduce(
+      (acc, row) => acc + Number(getNestedValue(row, config.toSum) || 0),
+      0
+    );
+    setComputedSums((prev) => ({
+      ...prev,
+      [key]: Number(sum.toFixed(3)).toLocaleString(),
+    }));
+  };
 
   // ------------
   // RENDERING HELPERS
@@ -234,11 +276,6 @@ const ReuseableTable = ({ data }) => {
   const renderHeaderCellContent = (cell, col, headerRowIndex) => {
     if (col.action === "checkMarks") {
       if (!currentRole.allowCheckbox) return "";
-      const allSelected =
-        tableRows.length > 0 &&
-        tableRows.every((row, rIndex) =>
-          selectedRows.includes(getRowId(row, rIndex))
-        );
       return (
         <input
           className="w-4 h-4"
@@ -246,9 +283,7 @@ const ReuseableTable = ({ data }) => {
           checked={allSelected}
           onChange={(e) => {
             if (e.target.checked) {
-              setSelectedRows(
-                tableRows.map((row, rIndex) => getRowId(row, rIndex))
-              );
+              setSelectedRows([...tableRows]);
             } else {
               setSelectedRows([]);
             }
@@ -263,19 +298,20 @@ const ReuseableTable = ({ data }) => {
     if (col.action) {
       if (col.action === "checkMarks") {
         if (!currentRole.allowCheckbox) return null;
-        const rowId = getRowId(row, rowIndex);
         return (
           <input
             type="checkbox"
-            checked={selectedRows.includes(rowId)}
-            onChange={() => handleRowCheckboxChange(rowId)}
+            checked={selectedRows.some(
+              (selected) =>
+                getRowId(selected, rowIndex) === getRowId(row, rowIndex)
+            )}
+            onChange={() => handleRowCheckboxChange(row, rowIndex)}
             className="w-4 h-4"
           />
         );
       } else if (col.action === "actions") {
         if (!currentRole.allowActions) return null;
         let filteredActions = actionsData;
-        // If allowActions is an array of allowed labels, filter actions accordingly.
         if (Array.isArray(currentRole.allowActions)) {
           filteredActions = actionsData.filter(
             (action) =>
@@ -444,58 +480,86 @@ const ReuseableTable = ({ data }) => {
         </tbody>
 
         {/* FOOTER */}
-        {processedFooterRows.map((row, footerRowIndex) => (
-          <tr key={`footer-${footerRowIndex}`}>
-            {canonicalColumns.map((col, colIndex) => {
-              if (!isColumnAllowed(col)) return null;
-              const mergeResult = getMergeAttributes(
-                footerRowIndex,
-                colIndex,
-                "footer"
-              );
-              if (mergeResult === null) return null;
-              // Use the footer cell's key: if it’s a number, compare with the column index.
-              const cell =
-                row.find((c) => {
-                  if (typeof c.key === "number") {
-                    return c.key === colIndex;
-                  }
-                  return c.key === col.key;
-                }) || {};
-              let content = cell.footer || "";
-              if (
-                mergeResult.mergeItem &&
-                Array.isArray(mergeResult.mergeItem.showData)
-              ) {
-                content = getCombinedContent(
-                  null,
-                  mergeResult.mergeItem,
-                  false,
-                  true
+        <tfoot>
+          {processedFooterRows.map((row, footerRowIndex) => (
+            <tr key={`footer-${footerRowIndex}`}>
+              {canonicalColumns.map((col, colIndex) => {
+                if (!isColumnAllowed(col)) return null;
+                const mergeResult = getMergeAttributes(
+                  footerRowIndex,
+                  colIndex,
+                  "footer"
                 );
-              }
-              return (
-                <td
-                  key={colIndex}
-                  {...mergeResult.props}
-                  className={`${
-                    footersManager?.dataVariant ||
-                    "px-4 py-2 text-left text-sm font-medium text-gray-700 border border-cyan-300"
-                  }`}
-                >
-                  <span
-                    className={`flex flex-row ${
-                      footersManager?.dataPosition ||
-                      "items-center justify-center"
+                if (mergeResult === null) return null;
+                // Find the matching footer cell (either by numeric col index or key)
+                const cell =
+                  row.find((c) => {
+                    if (typeof c.col === "number") {
+                      return c.col === colIndex;
+                    }
+                    return c.col === col.key;
+                  }) || {};
+
+                let content = cell.footer || "";
+                if (
+                  mergeResult.mergeItem &&
+                  Array.isArray(mergeResult.mergeItem.showData)
+                ) {
+                  content = getCombinedContent(
+                    null,
+                    mergeResult.mergeItem,
+                    false,
+                    true
+                  );
+                }
+
+                // If there is a sum configuration for this key,
+                // now the cell **without** sumChecked is the clickable button,
+                // and the one **with** sumChecked is designated to display the computed sum.
+                if (cell.key && sumConfigs[cell.key]) {
+                  if (cell.sumChecked) {
+                    // This cell displays the computed sum.
+                    content =
+                      computedSums[cell.key] !== undefined
+                        ? computedSums[cell.key]
+                        : 0;
+                  } else {
+                    // This cell is the clickable button.
+                    content = (
+                      <button
+                        className="hover:opacity-75 active:opacity-90"
+                        onClick={() => handleSumClick(cell.key)}
+                        style={{ cursor: "pointer" }}
+                      >
+                        {cell.footer === true ? "Click to Sum" : cell.footer}
+                      </button>
+                    );
+                  }
+                }
+
+                return (
+                  <td
+                    key={colIndex}
+                    {...mergeResult.props}
+                    className={`${
+                      footersManager?.dataVariant ||
+                      "px-4 py-2 text-left text-sm font-medium text-gray-700 border border-cyan-300 bg-cyan-50"
                     }`}
                   >
-                    {content}
-                  </span>
-                </td>
-              );
-            })}
-          </tr>
-        ))}
+                    <span
+                      className={`flex flex-row ${
+                        footersManager?.dataPosition ||
+                        "items-center justify-center"
+                      }`}
+                    >
+                      {content}
+                    </span>
+                  </td>
+                );
+              })}
+            </tr>
+          ))}
+        </tfoot>
       </table>
     </div>
   );
