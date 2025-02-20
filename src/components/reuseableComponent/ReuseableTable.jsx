@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router";
 
 // Utility: Convert array of { key, value } items into an object.
 const parseTableData = (data) => {
@@ -103,6 +104,7 @@ const ReusableTable = ({ data }) => {
   } = tableDataObject;
 
   const currentRole = getCurrentRole(access);
+  const navigate = useNavigate();
 
   // Helper: Check whether a column should be rendered.
   const isColumnAllowed = (col) => {
@@ -342,7 +344,18 @@ const ReusableTable = ({ data }) => {
             {filteredActions.map((action, actionIndex) => (
               <button
                 key={actionIndex}
-                onClick={() => action.onClick && action.onClick(row)}
+                onClick={() => {
+                  // If the action is a detail action and a detailPath prop is provided,
+                  // perform navigation. Otherwise, use the provided onClick.
+                  if (
+                    typeof action.onClick === "function" &&
+                    action.onClick.toString().includes("navigator")
+                  ) {
+                    action.onClick(navigate, row);
+                  } else if (action.onClick) {
+                    action.onClick(row);
+                  }
+                }}
                 className={`flex items-center justify-center ${
                   action.actionVariant || "text-gray-500 hover:text-gray-700"
                 } ${

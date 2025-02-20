@@ -2,13 +2,11 @@ import React from "react";
 import { useGetNormalItemListsQuery } from "../../features/api/fakeStoreApi";
 import TableGroup from "../../components/reuseableComponent/TableGroup";
 import TestTwo from "../../components/test/TestTwo";
-import { useNavigate } from "react-router";
 
 const TablePageThree = () => {
   const { data } = useGetNormalItemListsQuery();
   console.log(data);
   const currentItems = data;
-  const nav = useNavigate();
   const totalSum = Number(
     currentItems?.reduce((sum, item) => sum + item.price, 0).toFixed(3)
   );
@@ -149,7 +147,8 @@ const TablePageThree = () => {
       value: [
         {
           label: "Detail",
-          onClick: (row) => navigator(row),
+          onClick: (navigator, row) =>
+            navigator(`/cms-admin/tablePageDetail/${row.id}`),
           icon: "✎",
           iconFlexType: "vertical",
           gapBetween: 4,
@@ -170,10 +169,6 @@ const TablePageThree = () => {
 
   const handleAction = (row, actionType) => {
     console.log(actionType, "on row:", row);
-  };
-
-  const navigator = (row) => {
-    nav(`/cms-admin/tablePageDetail/${row.id}`);
   };
 
   const themeManager = [
@@ -258,7 +253,7 @@ const TablePageThree = () => {
   ];
 
   const access = [
-    { key: "role", value: "sales" },
+    { key: "role", value: "admin" },
     {
       key: "permission",
       value: {
