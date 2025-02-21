@@ -111,8 +111,7 @@ const TablePageThree = () => {
           },
           {
             footer: true,
-            sumChecked: true,
-            key: "uniqueIdCheckbox",
+            sumChecked: "uniqueIdCheckbox",
             toSum: "price",
             col: 3,
           },
