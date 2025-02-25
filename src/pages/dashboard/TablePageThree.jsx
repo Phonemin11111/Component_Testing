@@ -1,5 +1,8 @@
 import React from "react";
-import { useGetNormalItemListsQuery } from "../../features/api/fakeStoreApi";
+import {
+  useGetDeletedItemMutation,
+  useGetNormalItemListsQuery,
+} from "../../features/api/fakeStoreApi";
 import TableGroup from "../../components/reuseableComponent/TableGroup";
 import TestTwo from "../../components/test/TestTwo";
 
@@ -45,6 +48,7 @@ const TablePageThree = () => {
           { header: true, key: "checkBox", action: "checkMarks" },
           { header: "ID", key: "id" },
           { header: "Name", key: "title" },
+          { header: "Image", key: "image", action: "photos" },
           { header: "Price", key: "price" },
           { header: "Description", key: "description", icon: "📝" },
           { header: "Category", key: "category" },
@@ -74,7 +78,12 @@ const TablePageThree = () => {
     },
     {
       key: "data",
-      value: { data: currentItems, dataLength: currentItems?.length },
+      value: {
+        data: currentItems,
+        dataLength: currentItems?.length,
+        deleteQuery: useGetDeletedItemMutation,
+        param: "စားပြီးပြီလား",
+      },
     },
   ];
 
@@ -130,46 +139,70 @@ const TablePageThree = () => {
     },
   ];
 
-  const actions = [
+  const action = [
     {
-      key: "manager",
-      value: [
+      photos: [
         {
-          id: "actionsVariant",
-          actionsFlexType: "horizontal",
-          actionsBetween: 8,
-          dataPosition: "items-center justify-center",
+          key: "manager",
+          value: [
+            {
+              id: "photosVariant",
+              dataSize: { x: 50 },
+              dataFit: "contain",
+              dataRadius: 5,
+              dataRatio: 1 / 1,
+            },
+          ],
         },
       ],
     },
     {
-      key: "data",
-      value: [
+      actions: [
         {
-          label: "Detail",
-          onClick: (navigator, row) =>
-            navigator(`/cms-admin/tablePageDetail/${row.id}`),
-          icon: "✎",
-          iconFlexType: "vertical",
-          gapBetween: 4,
-          iconVariant: "text-yellow-500",
-          dataVariant: "text-yellow-500 hover:text-yellow-700",
+          key: "manager",
+          value: [
+            {
+              id: "actionsVariant",
+              actionsFlexType: "horizontal",
+              actionsBetween: 8,
+              dataPosition: "items-center justify-center",
+            },
+          ],
         },
         {
-          label: "Delete",
-          onClick: (row) => handleAction(row, "delete"),
-          icon: "✂",
-          gapBetween: 4,
-          iconVariant: "text-yellow-500",
-          dataVariant: "text-yellow-500 hover:text-yellow-700",
+          key: "data",
+          value: [
+            {
+              label: "Detail",
+              onClick: (navigator, row) =>
+                navigator(`/cms-admin/tablePageDetail/${row.id}`),
+              icon: "✎",
+              iconFlexType: "vertical",
+              gapBetween: 4,
+              iconVariant: "text-yellow-500",
+              dataVariant: "text-yellow-500 hover:text-yellow-700",
+            },
+            {
+              label: "Delete",
+              onClick: (eradicator, row) => eradicator(row?.id),
+              icon: "✂",
+              gapBetween: 4,
+              iconVariant: "text-yellow-500",
+              dataVariant: "text-yellow-500 hover:text-yellow-700",
+            },
+            {
+              label: "Favorite",
+              // onClick: (eradicator, row) => eradicator(row?.id),
+              icon: "❤︎",
+              gapBetween: 4,
+              iconVariant: "text-red-500",
+              dataVariant: "text-yellow-500 hover:text-yellow-700",
+            },
+          ],
         },
       ],
     },
   ];
-
-  const handleAction = (row, actionType) => {
-    console.log(actionType, "on row:", row);
-  };
 
   const themeManager = [
     {
@@ -205,11 +238,10 @@ const TablePageThree = () => {
   ];
 
   const paginationEngines = {
-    pagination: true,
-    sortDate: true,
-    sortTime: true,
+    pagination: "frontendMode",
     goPage: true,
     perPage: true,
+    sorting: true,
   };
 
   const merges = [
@@ -223,8 +255,9 @@ const TablePageThree = () => {
         { type: "header", startCol: 3, colSpan: 1, rowSpan: 2 },
         { type: "header", startCol: 4, colSpan: 1, rowSpan: 2 },
         { type: "header", startCol: 5, colSpan: 1, rowSpan: 2 },
-        { type: "header", startCol: 6, colSpan: 2, rowSpan: 1 },
-        { type: "header", startCol: 8, colSpan: 1, rowSpan: 2 },
+        { type: "header", startCol: 6, colSpan: 1, rowSpan: 2 },
+        { type: "header", startCol: 7, colSpan: 2, rowSpan: 1 },
+        { type: "header", startCol: 9, colSpan: 1, rowSpan: 2 },
         // { type: "body", startRow: 1, startCol: 1, colSpan: 1, rowSpan: 1 },
         // { type: "body", startRow: 1, startCol: 1, colSpan: 1, rowSpan: 1 },
         // {
@@ -237,17 +270,17 @@ const TablePageThree = () => {
         //   applyToAllRows: true,
         // },
         { type: "footer", startCol: 0, colSpan: 3, rowSpan: 1 },
-        { type: "footer", startCol: 3, colSpan: 6, rowSpan: 1 },
+        { type: "footer", startCol: 3, colSpan: 7, rowSpan: 1 },
         { type: "footer", startRow: 1, startCol: 0, colSpan: 3, rowSpan: 1 },
-        { type: "footer", startRow: 1, startCol: 3, colSpan: 6, rowSpan: 1 },
+        { type: "footer", startRow: 1, startCol: 3, colSpan: 7, rowSpan: 1 },
         { type: "footer", startRow: 2, startCol: 0, colSpan: 3, rowSpan: 1 },
-        { type: "footer", startRow: 2, startCol: 3, colSpan: 6, rowSpan: 1 },
+        { type: "footer", startRow: 2, startCol: 3, colSpan: 7, rowSpan: 1 },
         { type: "footer", startRow: 3, startCol: 0, colSpan: 3, rowSpan: 1 },
-        { type: "footer", startRow: 3, startCol: 3, colSpan: 6, rowSpan: 1 },
+        { type: "footer", startRow: 3, startCol: 3, colSpan: 7, rowSpan: 1 },
         { type: "footer", startRow: 4, startCol: 0, colSpan: 4, rowSpan: 1 },
         { type: "footer", startRow: 4, startCol: 4, colSpan: 6, rowSpan: 1 },
         { type: "footer", startRow: 5, startCol: 0, colSpan: 5, rowSpan: 1 },
-        { type: "footer", startRow: 5, startCol: 5, colSpan: 4, rowSpan: 1 },
+        { type: "footer", startRow: 5, startCol: 5, colSpan: 5, rowSpan: 1 },
       ],
     },
   ];
@@ -281,7 +314,7 @@ const TablePageThree = () => {
     { key: "caption", value: caption },
     { key: "themeManager", value: themeManager },
     { key: "columns", value: columns },
-    { key: "actions", value: actions },
+    { key: "action", value: action },
     { key: "footers", value: footers },
     { key: "data", value: bodyData },
     { key: "perPage", value: currentItems?.length },
@@ -292,11 +325,7 @@ const TablePageThree = () => {
   return (
     <div className=" flex flex-col w-full h-full gap-5">
       <TestTwo />
-      <TableGroup
-        data={tableData}
-        frontendMode
-        paginationCore={paginationEngines}
-      />
+      <TableGroup data={tableData} paginationCore={paginationEngines} />
     </div>
   );
 };

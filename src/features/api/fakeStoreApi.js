@@ -22,8 +22,18 @@ export const fakeStoreApi = createApi({
       }),
       providesTags: ["fakeStoreApi"],
     }),
+    getDeletedItem: builder.mutation({
+      query: ({ id }) => ({
+        url: `products/${id}`,
+        method: "DELETE",
+      }),
+      providesTags: ["fakeStoreApi"],
+    }),
   }),
 });
 
-export const { useGetNormalItemListsQuery, useGetDetailedItemQuery } =
-  fakeStoreApi;
+export const {
+  useGetNormalItemListsQuery,
+  useGetDetailedItemQuery,
+  useGetDeletedItemMutation,
+} = fakeStoreApi;

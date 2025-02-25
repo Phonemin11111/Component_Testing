@@ -5,6 +5,10 @@ import TableGroup from "../../components/reuseableComponent/TableGroup";
 const TablePageFour = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const { data } = useGetPokemonListsQuery({ page: currentPage });
+  const newData = data?.results?.map((item) => ({
+    ...item,
+    created: item?.created ? new Date(item.created).toLocaleString() : null,
+  }));
 
   const columns = [
     {
@@ -13,7 +17,7 @@ const TablePageFour = () => {
         {
           id: "columnsVariant",
           dataVariant:
-            "bg-red-100 px-3 py-1 text-sm font-medium text-red-900 border border-red-300",
+            "bg-red-100 px-3 py-1 text-sm font-medium text-red-900 border-2 border-red-300",
           dataPosition: "item-center justify-center gap-1",
         },
       ],
@@ -21,13 +25,29 @@ const TablePageFour = () => {
     {
       key: "data",
       value: [
-        { header: "ID", key: "id", icon: "#" },
-        { header: "Name", key: "name" },
-        { header: "Status", key: "status" },
-        { header: "Species", key: "species" },
-        { header: "Type", key: "type" },
-        { header: "Gender", key: "gender" },
-        { header: "Management", key: "actions", action: "actions" },
+        [
+          { header: true, key: "checkBox", action: "checkMarks" },
+          { header: "ID", key: "id", icon: "#" },
+          { header: "Name", key: "name" },
+          { header: "Visual", key: "image", action: "photos" },
+          { header: "Status", key: "status", action: "badges" },
+          { header: "Species", key: "species" },
+          { header: "Type", key: "type" },
+          { header: "Gender", key: "gender" },
+          { header: "Location", key: "location.name" },
+          { header: "Location", key: "location.url", action: "links" },
+          { header: "Origin", key: "origin.name" },
+          { header: "Origin", key: "origin.url", action: "links" },
+          { header: "Link", key: "url", action: "links" },
+          { header: "Created", key: "created" },
+          { header: "Management", key: "actions", action: "actions" },
+        ],
+        [
+          { header: "Name", key: "location.name" },
+          { header: "Link", key: "location.url" },
+          { header: "Name", key: "origin.name" },
+          { header: "Link", key: "origin.url" },
+        ],
       ],
     },
   ];
@@ -38,8 +58,9 @@ const TablePageFour = () => {
       value: [
         {
           id: "bodyVariant",
+          dataColor: "bg-yellow-100 hover:bg-yellow-50",
           dataVariant:
-            "bg-yellow-100 px-2 py-2 text-sm font-medium text-yellow-900 border border-yellow-300",
+            "px-2 py-2 text-sm font-medium text-yellow-900 border-2 border-yellow-300 text-nowrap",
           dataPosition: "item-center justify-center",
         },
       ],
@@ -47,10 +68,11 @@ const TablePageFour = () => {
     {
       key: "data",
       value: {
-        data: data?.results,
+        data: newData,
         dataLength: data?.info?.count,
         currentPage: currentPage,
         setCurrentPage: setCurrentPage,
+        param: "စာမျက်နှာ",
       },
     },
   ];
@@ -63,15 +85,15 @@ const TablePageFour = () => {
           id: "footerVariant",
           dataVariant:
             "bg-gray-100 px-2 py-2 text-sm font-medium text-gray-900 border border-gray-300",
-          dataPosition: "item-center justify-center",
+          dataPosition: "item-center justify-start",
         },
       ],
     },
     {
       key: "data",
       value: [
-        { footer: "Total Items", key: "id" },
-        { footer: data?.info?.count, key: "gender" },
+        { footer: "Total Items", col: 0 },
+        { footer: data?.info?.count, col: 3 },
       ],
     },
   ];
@@ -91,36 +113,83 @@ const TablePageFour = () => {
     },
   ];
 
-  const actions = [
+  const action = [
     {
-      key: "manager",
-      value: [
+      badges: [
         {
-          id: "actionsVariant",
-          actionsFlexType: "horizontal",
-          actionsBetween: 8,
+          key: "manager",
+          value: {
+            dataSize: { x: 10, y: 6 },
+            dataRadius: 25,
+            dataBorderVariant: "border-transparent",
+            dataBorderSize: 1,
+            dataTextSize: 12,
+            dataFont: 600,
+          },
+          Alive: {
+            dataVariant: "bg-green-500",
+            dataTextVariant: "text-white",
+          },
+          Dead: {
+            dataVariant: "bg-red-500",
+            dataTextVariant: "text-white",
+          },
+          unknown: {
+            dataVariant: "bg-gray-500",
+            dataTextVariant: "text-white",
+          },
         },
       ],
     },
     {
-      key: "data",
-      value: [
+      photos: [
         {
-          label: "Edit",
-          onClick: (row) => handleAction(row, "edit"),
-          icon: "✎",
-          iconFlexType: "horizontal",
-          gapBetween: 4,
-          iconVariant: "text-cyan-500",
-          actionVariant: "text-yellow-500 hover:text-yellow-700",
+          key: "manager",
+          value: [
+            {
+              id: "photosVariant",
+              dataSize: { x: 40 },
+              dataFit: "cover",
+              dataRadius: 50,
+              dataRatio: 1 / 1,
+            },
+          ],
+        },
+      ],
+    },
+    {
+      actions: [
+        {
+          key: "manager",
+          value: [
+            {
+              id: "actionsVariant",
+              actionsFlexType: "horizontal",
+              actionsBetween: 8,
+            },
+          ],
         },
         {
-          label: "Delete",
-          onClick: (row) => handleAction(row, "delete"),
-          icon: "✂",
-          iconFlexType: "horizontal",
-          gapBetween: 4,
-          actionVariant: "text-red-500 hover:text-red-700",
+          key: "data",
+          value: [
+            {
+              label: "Edit",
+              onClick: (navigator, row) => navigator(`#`),
+              icon: "✎",
+              iconFlexType: "horizontal",
+              gapBetween: 4,
+              iconVariant: "text-cyan-500",
+              actionVariant: "text-yellow-500 hover:text-yellow-700",
+            },
+            {
+              label: "Delete",
+              onClick: (row) => handleAction(row, "delete"),
+              icon: "✂",
+              iconFlexType: "horizontal",
+              gapBetween: 4,
+              actionVariant: "text-red-500 hover:text-red-700",
+            },
+          ],
         },
       ],
     },
@@ -148,7 +217,7 @@ const TablePageFour = () => {
       key: "paginationVariant",
       value: [
         {
-          id: "colorScheme",
+          id: "colorVariant",
           dropdownVariant: "bg-white",
           backgroundVariant: "bg-white",
           hoverVariant: "hover:bg-yellow-100",
@@ -165,28 +234,37 @@ const TablePageFour = () => {
     {
       key: "data",
       value: [
-        { type: "header", startCol: 1, colSpan: 1, rowSpan: 1 },
-        { type: "header", startCol: 1, colSpan: 1, rowSpan: 1 },
+        { type: "header", startCol: 0, colSpan: 1, rowSpan: 2 },
+        { type: "header", startCol: 1, colSpan: 1, rowSpan: 2 },
+        { type: "header", startCol: 2, colSpan: 1, rowSpan: 2 },
+        { type: "header", startCol: 3, colSpan: 1, rowSpan: 2 },
+        { type: "header", startCol: 4, colSpan: 1, rowSpan: 2 },
+        { type: "header", startCol: 5, colSpan: 1, rowSpan: 2 },
+        { type: "header", startCol: 6, colSpan: 1, rowSpan: 2 },
+        { type: "header", startCol: 7, colSpan: 1, rowSpan: 2 },
+        { type: "header", startCol: 8, colSpan: 2, rowSpan: 1 },
+        { type: "header", startCol: 10, colSpan: 2, rowSpan: 1 },
+        { type: "header", startCol: 12, colSpan: 1, rowSpan: 2 },
+        { type: "header", startCol: 13, colSpan: 1, rowSpan: 2 },
+        { type: "header", startCol: 14, colSpan: 1, rowSpan: 2 },
         { type: "body", startRow: 1, startCol: 1, colSpan: 1, rowSpan: 1 },
         { type: "body", startRow: 1, startCol: 1, colSpan: 1, rowSpan: 1 },
-        {
-          type: "body",
-          startRow: 1,
-          startCol: 4,
-          colSpan: 3,
-          rowSpan: 1,
-          showData: 6,
-        },
-        { type: "footer", startCol: 0, colSpan: 5, rowSpan: 1 },
-        { type: "footer", startCol: 5, colSpan: 2, rowSpan: 1 },
+        // {
+        //   type: "body",
+        //   startRow: 1,
+        //   startCol: 3,
+        //   colSpan: 3,
+        //   rowSpan: 1,
+        //   showData: 3,
+        // },
+        { type: "footer", startCol: 0, colSpan: 3, rowSpan: 1 },
+        { type: "footer", startCol: 3, colSpan: 12, rowSpan: 1 },
       ],
     },
   ];
 
   const paginationEngines = {
     pagination: true,
-    sortDate: true,
-    sortTime: true,
     goPage: true,
     perPage: true,
   };
@@ -195,7 +273,7 @@ const TablePageFour = () => {
     { key: "themeManager", value: themeManager },
     { key: "caption", value: caption },
     { key: "columns", value: columns },
-    { key: "actions", value: actions },
+    { key: "action", value: action },
     { key: "footers", value: footers },
     { key: "data", value: bodyData },
     { key: "perPage", value: 20 },
@@ -223,3 +301,4 @@ export default TablePageFour;
 //8. Colgroup/Advance Columns Manager
 //9. Rowgroup/Advance Row Manager
 //[done] 10. Pagination Core & Engines
+// 11. To show photo at cell.

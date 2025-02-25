@@ -4,7 +4,7 @@ import ReusableTable from "./ReuseableTable";
 import PaginationLayout from "./reuseablePagination/PaginationLayout";
 import "../../CyanIC.css";
 
-const TableGroup = ({ data, frontendMode, paginationCore }) => {
+const TableGroup = ({ data, paginationCore }) => {
   const tableDataArray = Array.isArray(data) ? data : [];
   const tableData = Object.fromEntries(
     tableDataArray.map((item) => {
@@ -12,6 +12,7 @@ const TableGroup = ({ data, frontendMode, paginationCore }) => {
     })
   );
 
+  const paginationArray = paginationCore;
   const theme = tableData?.themeManager;
   const items = tableData.data;
   const filteredTableData = items?.find((b) => b.key === "data")?.value || [];
@@ -19,30 +20,38 @@ const TableGroup = ({ data, frontendMode, paginationCore }) => {
   const itemsPerPage = perPage;
   const [searchParams, setSearchParams] = useSearchParams();
   const [currentPage, setLocalCurrentPage] = useState(
-    frontendMode ? 1 : filteredTableData.currentPage
+    paginationArray?.pagination === "frontendMode"
+      ? 1
+      : filteredTableData.currentPage
   );
   const parentCurrentPage = filteredTableData.currentPage;
   const parentSetCurrentPage = filteredTableData.setCurrentPage;
+  const parentParam = filteredTableData?.param;
 
-  const filteredLayoutVariant = theme?.find((a) => a.key === "layoutVariant")
-    ?.value;
+  const filteredLayoutVariant = theme?.find(
+    (a) => a.key === "layoutVariant"
+  )?.value;
 
   const paginationPosition = filteredLayoutVariant?.find(
     (a) => a.id === "pagination"
   );
 
   useEffect(() => {
-    const pageParam = searchParams.get("page");
+    const pageParam = searchParams.get(parentParam ? parentParam : "page");
     if (pageParam) {
       setLocalCurrentPage(parseInt(pageParam));
     }
-  }, [searchParams]);
+  }, [searchParams, parentParam]);
 
   useEffect(() => {
     if (currentPage !== parentCurrentPage) {
-      setSearchParams(`?page=${currentPage}`);
+      const newSearchParams = parentParam
+        ? `?${parentParam.replace(/"(\d+)"/g, "$1")}=${currentPage}`
+        : `?page=${currentPage}`;
+
+      setSearchParams(newSearchParams);
     }
-  }, [currentPage, parentCurrentPage, setSearchParams]);
+  }, [currentPage, parentCurrentPage, setSearchParams, parentParam]);
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -61,6 +70,7 @@ const TableGroup = ({ data, frontendMode, paginationCore }) => {
     modifiedBodyData[dataItemIndex] = {
       ...modifiedBodyData[dataItemIndex],
       value: {
+        ...modifiedBodyData[dataItemIndex].value,
         data: calculatedItems || [],
         dataLength: filteredTableData?.length || 0,
       },
@@ -69,14 +79,14 @@ const TableGroup = ({ data, frontendMode, paginationCore }) => {
 
   useEffect(() => {
     if (
-      !frontendMode &&
+      paginationArray?.pagination !== "frontendMode" &&
       currentPage !== parentCurrentPage &&
       parentCurrentPage &&
       parentSetCurrentPage
     ) {
       parentSetCurrentPage(currentPage);
     }
-  }, [currentPage, parentCurrentPage, parentSetCurrentPage, frontendMode]);
+  }, [currentPage, parentCurrentPage, parentSetCurrentPage, paginationArray]);
 
   useEffect(() => {
     if (currentPage > totalPages) {
@@ -93,11 +103,14 @@ const TableGroup = ({ data, frontendMode, paginationCore }) => {
   const gridData = [
     { key: "caption", value: tableData.caption || [] },
     { key: "columns", value: tableData.columns || [] },
-    { key: "actions", value: tableData.actions || [] },
+    { key: "action", value: tableData.action || [] },
     { key: "footers", value: tableData.footers || [] },
     {
       key: "data",
-      value: frontendMode ? modifiedBodyData || [] : tableData.data || [],
+      value:
+        paginationArray?.pagination === "frontendMode"
+          ? modifiedBodyData || []
+          : tableData.data || [],
     },
     { key: "merges", value: tableData.merges || [] },
     { key: "access", value: tableData.access || [] },
@@ -118,14 +131,14 @@ const TableGroup = ({ data, frontendMode, paginationCore }) => {
       key: "paginationVariant",
       value: tableData.themeManager || [],
     },
-    { key: "paginationEngines", value: paginationCore || [] },
+    { key: "paginationEngines", value: paginationArray || [] },
     { key: "setSearchParams", value: setSearchParams || [] },
   ];
 
   return (
     <div className="flex flex-col w-full h-full">
       <ReusableTable data={gridData} />
-      {paginationCore && (
+      {paginationArray && (
         <div
           style={{
             marginTop: `${paginationPosition?.gapAbove || 20}px`,

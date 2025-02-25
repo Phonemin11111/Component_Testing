@@ -96,7 +96,7 @@ const ReusableTable = ({ data }) => {
     caption,
     columns,
     data: tableData,
-    actions,
+    action,
     merges,
     footers,
     captionVariant: theme,
@@ -124,9 +124,27 @@ const ReusableTable = ({ data }) => {
   const columnsDataRaw = getSectionData(columns);
   const mergesData = getSectionData(merges);
   const footersDataRaw = getSectionData(footers);
-  const actionsData = getSectionData(actions);
+  const actionsData = action
+    ?.flatMap((a) => a.actions || [])
+    .find((a) => a.key === "data")?.value;
   const tableRows = tableData?.find((d) => d.key === "data")?.value?.data || [];
+  const deleteQuery =
+    tableData?.find((item) => item.key === "data")?.value?.deleteQuery || {};
 
+  const [deletedItem] = typeof deleteQuery === "function" ? deleteQuery() : [];
+  const handleDelete = async (id) => {
+    if (!deletedItem) {
+      console.error("deletedItem is not defined"); // Debugging step
+      return;
+    }
+
+    try {
+      const { data } = await deletedItem({ id }); // ✅ This should now work
+      console.log("Deleted item:", data);
+    } catch (error) {
+      console.error("Delete failed:", error);
+    }
+  };
   // Handle multi-row headers/footers.
   const headerRows = Array.isArray(columnsDataRaw[0])
     ? columnsDataRaw
@@ -148,7 +166,14 @@ const ReusableTable = ({ data }) => {
     ?.value?.find((a) => a.id === "caption");
   const columnsManager = getSectionManager(columns, "columnsVariant");
   const bodyManager = getSectionManager(tableData, "bodyVariant");
-  const actionsManager = getSectionManager(actions, "actionsVariant");
+  const actionsManager = action
+    ?.flatMap((a) => a.actions || [])
+    ?.find((a) => a.key === "manager")
+    ?.value?.find((item) => item.id === "actionsVariant");
+  const photosManager = action
+    ?.flatMap((a) => a.photos || [])
+    ?.find((a) => a.key === "manager")
+    ?.value?.find((item) => item.id === "photosVariant");
   const footersManager = getSectionManager(footers, "footerVariant");
 
   // MERGE HANDLING FUNCTIONS
@@ -321,11 +346,132 @@ const ReusableTable = ({ data }) => {
             onChange={() => handleRowCheckboxChange(row, rowIndex)}
           />
         );
+      } else if (col.action === "badges") {
+        const badgesManager = action?.flatMap((a) => a.badges || []);
+        if (badgesManager?.length) {
+          const status = row.status; // e.g. "Alive", "Dead", or "unknown"
+          // Find the badge that defines the current status
+          const badgeForStatus = badgesManager.find((badge) => badge[status]);
+          // Get status-specific data if available
+          const statusData = badgeForStatus ? badgeForStatus[status] : null;
+
+          // Use status-specific variants if they exist; otherwise fallback to value-level or defaults.
+          const dataVariant =
+            statusData?.dataVariant ||
+            badgeForStatus?.value?.dataVariant ||
+            "bg-cyan-600";
+          const dataTextVariant =
+            statusData?.dataTextVariant ||
+            badgeForStatus?.value?.dataTextVariant ||
+            "text-white";
+          const commonStyles = badgeForStatus?.value || {};
+          const dataBorderVariant =
+            statusData?.dataBorderVariant ||
+            commonStyles.dataBorderVariant ||
+            "border-transparent";
+
+          // Calculate style values with fallback defaults
+          const paddingY =
+            (statusData?.dataSize?.y ?? commonStyles?.dataSize?.y ?? 6) + "px";
+          const paddingX =
+            (statusData?.dataSize?.x ?? commonStyles?.dataSize?.x ?? 10) + "px";
+          const fontSize =
+            (statusData?.dataTextSize ?? commonStyles?.dataTextSize ?? 12) +
+            "px";
+
+          const dataFont = statusData?.dataFont ?? commonStyles?.dataFont;
+          const fontWeight =
+            typeof dataFont === "number" ? dataFont : dataFont || 600;
+
+          const borderSize =
+            statusData?.dataBorderSize ?? commonStyles?.dataBorderSize;
+          const borderWidth =
+            typeof borderSize === "number" ? `${borderSize}px` : borderSize;
+
+          const dataRadius = statusData?.dataRadius ?? commonStyles?.dataRadius;
+          const borderRadius =
+            typeof dataRadius === "number"
+              ? `${dataRadius}px`
+              : dataRadius || "16px";
+
+          const style = {
+            padding: `${paddingY} ${paddingX}`,
+            fontSize,
+            fontWeight,
+            borderWidth,
+            borderRadius,
+          };
+
+          return (
+            <div
+              className={`
+                ${dataVariant} ${dataTextVariant} border ${dataBorderVariant}
+                hover:opacity-80 transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2
+              `}
+              style={style}
+            >
+              {status}
+            </div>
+          );
+        }
+      } else if (col.action === "photos") {
+        const imageUrl = getNestedValue(row, col.key);
+        if (imageUrl) {
+          return (
+            <div
+              style={{
+                width:
+                  typeof photosManager?.dataSize?.x === "number"
+                    ? `${photosManager?.dataSize?.x || 64}px`
+                    : photosManager?.dataSize?.x || "100%",
+                height:
+                  typeof photosManager?.dataSize?.y === "number" &&
+                  `${photosManager?.dataSize?.y || 64}px`,
+                aspectRatio: photosManager?.dataRatio || "1 / 1",
+                overflow: "hidden",
+                borderRadius: photosManager?.dataRadius
+                  ? `${photosManager.dataRadius}px`
+                  : "8px",
+              }}
+            >
+              <img
+                title={imageUrl}
+                src={imageUrl}
+                alt="Preview"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: photosManager?.dataFit || "cover",
+                }}
+              />
+            </div>
+          );
+        }
+      } else if (col.action === "links") {
+        const linkUrl = getNestedValue(row, col.key);
+        if (linkUrl) {
+          return (
+            <button className="w-[54px] text-cyan-500 hover:text-cyan-700 ">
+              <a
+                title={linkUrl}
+                href={linkUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-nowrap flex flex-row items-center justify-center gap-[2px] hover:gap-[4px] group transition-all duration-200 ease-out hover:scale-110"
+              >
+                <span className="relative z-10 underline group-hover:underline-offset-3 decoration-1 underline-offset-1 font-light transition-all duration-200 ease-out">
+                  Visit
+                </span>
+                <span className="relative z-10 text-[16px]">⮺</span>
+              </a>
+            </button>
+          );
+        }
       } else if (col.action === "actions") {
         if (!currentRole.allowActions) return null;
         let filteredActions = actionsData;
         if (Array.isArray(currentRole.allowActions)) {
-          filteredActions = actionsData.filter(
+          filteredActions = actionsData?.filter(
             (action) =>
               action.label && currentRole.allowActions.includes(action.label)
           );
@@ -341,17 +487,20 @@ const ReusableTable = ({ data }) => {
             }`}
             style={{ gap: `${actionsManager?.actionsBetween || 8}px` }}
           >
-            {filteredActions.map((action, actionIndex) => (
+            {filteredActions?.map((action, actionIndex) => (
               <button
                 key={actionIndex}
                 onClick={() => {
-                  // If the action is a detail action and a detailPath prop is provided,
-                  // perform navigation. Otherwise, use the provided onClick.
                   if (
                     typeof action.onClick === "function" &&
                     action.onClick.toString().includes("navigator")
                   ) {
                     action.onClick(navigate, row);
+                  } else if (
+                    typeof action.onClick === "function" &&
+                    action.onClick.toString().includes("eradicator")
+                  ) {
+                    action.onClick(handleDelete, row);
                   } else if (action.onClick) {
                     action.onClick(row);
                   }
@@ -397,7 +546,7 @@ const ReusableTable = ({ data }) => {
         themeManager?.dataPosition || "text-center"
       }`}
     >
-      {captionData} (Access: {access?.find((a) => a.key === "role")?.value})
+      {captionData}
     </caption>
   );
 
@@ -455,7 +604,10 @@ const ReusableTable = ({ data }) => {
   const renderBody = () => (
     <tbody>
       {tableRows.map((row, rowIndex) => (
-        <tr key={rowIndex}>
+        <tr
+          key={rowIndex}
+          className={`${bodyManager?.dataColor || "hover:bg-cyan-50"}`}
+        >
           {baseColumns.map((col, colIndex) => {
             if (!isColumnAllowed(col)) return null;
             const mergeResult = getMergeAttributes(rowIndex, colIndex, "body");
@@ -576,7 +728,7 @@ const ReusableTable = ({ data }) => {
         {renderCaption()}
         {renderHeader()}
         {renderBody()}
-        {renderFooter()}
+        {footersDataRaw?.length > 0 && renderFooter()}
       </table>
     </div>
   );
