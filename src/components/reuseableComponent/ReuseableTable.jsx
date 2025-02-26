@@ -1,5 +1,14 @@
-import React, { useState } from "react";
+import React, { useLayoutEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
+
+const getCookie = (name) => {
+  const cookies = document.cookie.split("; ");
+  for (let cookie of cookies) {
+    const [key, value] = cookie.split("=");
+    if (key === name) return decodeURIComponent(value);
+  }
+  return null;
+};
 
 // Utility: Convert array of { key, value } items into an object.
 const parseTableData = (data) => {
@@ -130,21 +139,25 @@ const ReusableTable = ({ data }) => {
   const tableRows = tableData?.find((d) => d.key === "data")?.value?.data || [];
   const deleteQuery =
     tableData?.find((item) => item.key === "data")?.value?.deleteQuery || {};
+  const authenticator =
+    tableData?.find((item) => item.key === "data")?.value?.authenticator || {};
 
+  const token = getCookie(authenticator);
+  console.log(token !== null ? token : "no token yet");
   const [deletedItem] = typeof deleteQuery === "function" ? deleteQuery() : [];
   const handleDelete = async (id) => {
     if (!deletedItem) {
       console.error("deletedItem is not defined"); // Debugging step
       return;
     }
-
     try {
-      const { data } = await deletedItem({ id }); // ✅ This should now work
+      const { data } = await deletedItem({ token, id }); // ✅ This should now work
       console.log("Deleted item:", data);
     } catch (error) {
       console.error("Delete failed:", error);
     }
   };
+
   // Handle multi-row headers/footers.
   const headerRows = Array.isArray(columnsDataRaw[0])
     ? columnsDataRaw
@@ -478,46 +491,57 @@ const ReusableTable = ({ data }) => {
         }
         return (
           <div
-            className={`flex ${
+            className={`inline-grid ${
               actionsManager?.dataPosition || "items-center justify-center"
             } ${
               actionsManager?.actionsFlexType === "horizontal"
-                ? "flex-row"
-                : "flex-col"
+                ? "grid-flow-col"
+                : "grid-flow-row"
             }`}
-            style={{ gap: `${actionsManager?.actionsBetween || 8}px` }}
+            style={{
+              gap: `${actionsManager?.actionsBetween || 8}px`,
+              ...(actionsManager?.actionsFlexType === "horizontal"
+                ? { gridTemplateRows: "repeat(1, auto)" }
+                : {
+                    gridTemplateColumns: "repeat(2, auto)",
+                  }),
+            }}
           >
-            {filteredActions?.map((action, actionIndex) => (
-              <button
-                key={actionIndex}
-                onClick={() => {
-                  if (
-                    typeof action.onClick === "function" &&
-                    action.onClick.toString().includes("navigator")
-                  ) {
-                    action.onClick(navigate, row);
-                  } else if (
-                    typeof action.onClick === "function" &&
-                    action.onClick.toString().includes("eradicator")
-                  ) {
-                    action.onClick(handleDelete, row);
-                  } else if (action.onClick) {
-                    action.onClick(row);
-                  }
-                }}
-                className={`flex items-center justify-center ${
-                  action.actionVariant || "text-gray-500 hover:text-gray-700"
-                } ${
-                  action.iconFlexType === "horizontal" ? "flex-row" : "flex-col"
-                }`}
-                style={{ gap: `${action.gapBetween || 4}px` }}
-              >
-                {action.icon && (
-                  <span className={action.iconVariant}>{action.icon}</span>
-                )}
-                {action.label}
-              </button>
-            ))}
+            {filteredActions?.map((action, actionIndex) => {
+              return (
+                <button
+                  key={actionIndex}
+                  onClick={() => {
+                    if (
+                      typeof action.onClick === "function" &&
+                      action.onClick.toString().includes("navigator")
+                    ) {
+                      action.onClick(navigate, row);
+                    } else if (
+                      typeof action.onClick === "function" &&
+                      action.onClick.toString().includes("eradicator")
+                    ) {
+                      action.onClick(handleDelete, row);
+                    } else if (action.onClick) {
+                      action.onClick(row);
+                    }
+                  }}
+                  className={`flex col-span-1 items-center justify-center ${
+                    action.actionVariant || "text-gray-500 hover:text-gray-700"
+                  } ${
+                    action.iconFlexType === "horizontal"
+                      ? "flex-row"
+                      : "flex-col"
+                  }`}
+                  style={{ gap: `${action.gapBetween || 4}px` }}
+                >
+                  {action.icon && (
+                    <span className={action.iconVariant}>{action.icon}</span>
+                  )}
+                  {action.label}
+                </button>
+              );
+            })}
           </div>
         );
       }

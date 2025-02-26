@@ -2,17 +2,38 @@ import React from "react";
 import {
   useGetDeletedItemMutation,
   useGetNormalItemListsQuery,
+  useGetUsersQuery,
+  useLoginMutation,
 } from "../../features/api/fakeStoreApi";
 import TableGroup from "../../components/reuseableComponent/TableGroup";
 import TestTwo from "../../components/test/TestTwo";
+import { useDispatch } from "react-redux";
+import { addUser } from "../../features/service/authSlice";
+import { useForm } from "react-hook-form";
 
 const TablePageThree = () => {
   const { data } = useGetNormalItemListsQuery();
-  console.log(data);
+  const { data: userData } = useGetUsersQuery();
   const currentItems = data;
   const totalSum = Number(
     currentItems?.reduce((sum, item) => sum + item.price, 0).toFixed(3)
   );
+
+  const { register, handleSubmit } = useForm({
+    username: "",
+    password: "",
+  });
+  const [login] = useLoginMutation();
+  const dispatch = useDispatch();
+
+  const loginHandler = async (user) => {
+    const { data } = await login(user);
+    dispatch(addUser({ token: data?.token }));
+    console.log(data);
+  };
+
+  // console.log(data);
+  // console.log(userData);
 
   const caption = [
     {
@@ -82,6 +103,7 @@ const TablePageThree = () => {
         data: currentItems,
         dataLength: currentItems?.length,
         deleteQuery: useGetDeletedItemMutation,
+        authenticator: "token",
         param: "စားပြီးပြီလား",
       },
     },
@@ -163,7 +185,7 @@ const TablePageThree = () => {
           value: [
             {
               id: "actionsVariant",
-              actionsFlexType: "horizontal",
+              actionsFlexType: "vertical",
               actionsBetween: 8,
               dataPosition: "items-center justify-center",
             },
@@ -192,7 +214,7 @@ const TablePageThree = () => {
             },
             {
               label: "Favorite",
-              // onClick: (eradicator, row) => eradicator(row?.id),
+              onClick: (abductor, row) => abductor(row?.id),
               icon: "❤︎",
               gapBetween: 4,
               iconVariant: "text-red-500",
@@ -241,7 +263,7 @@ const TablePageThree = () => {
     pagination: "frontendMode",
     goPage: true,
     perPage: true,
-    sorting: true,
+    // sorting: true,
   };
 
   const merges = [
@@ -325,6 +347,31 @@ const TablePageThree = () => {
   return (
     <div className=" flex flex-col w-full h-full gap-5">
       <TestTwo />
+      <form
+        onSubmit={handleSubmit(loginHandler)}
+        className=" flex flex-col gap-2.5 items-center justify-center"
+      >
+        <input
+          className="bg-cyan-500 px-2 py-1"
+          {...register("username")}
+          type="text"
+          value="johnd"
+        />
+        <input
+          className="bg-cyan-500 px-2 py-1"
+          {...register("password")}
+          type="text"
+          value="m38rmF$"
+        />
+        <span className=" flex flex-row items-center justify-center gap-2.5">
+          <button className="bg-cyan-500 px-2 py-1" type="submit">
+            Login
+          </button>
+          <button className="bg-red-500 px-2 py-1" type="submit">
+            Logout
+          </button>
+        </span>
+      </form>
       <TableGroup data={tableData} paginationCore={paginationEngines} />
     </div>
   );

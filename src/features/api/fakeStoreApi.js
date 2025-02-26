@@ -29,6 +29,21 @@ export const fakeStoreApi = createApi({
       }),
       providesTags: ["fakeStoreApi"],
     }),
+    login: builder.mutation({
+      query: (user) => ({
+        url: `auth/login`,
+        method: "POST",
+        body: user,
+      }),
+      providesTags: ["fakeStoreApi"],
+    }),
+    getUsers: builder.query({
+      query: () => ({
+        url: `users`,
+        method: "GET",
+      }),
+      providesTags: ["fakeStoreApi"],
+    }),
   }),
 });
 
@@ -36,4 +51,6 @@ export const {
   useGetNormalItemListsQuery,
   useGetDetailedItemQuery,
   useGetDeletedItemMutation,
+  useLoginMutation,
+  useGetUsersQuery,
 } = fakeStoreApi;
