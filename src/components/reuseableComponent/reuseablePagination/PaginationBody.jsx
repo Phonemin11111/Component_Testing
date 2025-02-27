@@ -222,13 +222,13 @@ const PaginationBody = ({ data }) => {
                       >
                         <button
                           onClick={() => handlePageClick(totalPages)}
-                          className={`block w-full p-1 rounded-t ${
+                          className={`block tracking-[-7px] text-xl pr-[5px] pb-[2px] w-full  rounded-t ${
                             filteredColorVariant?.colorVariant
                               ? `${filteredColorVariant?.colorVariant} ${filteredColorVariant?.hoverVariant}`
                               : "text-cyan-500 hover:bg-cyan-100"
                           }`}
                         >
-                          ⥬
+                          {">>"}
                         </button>
                       </li>
                     ) : page === "right" ? (
@@ -241,13 +241,13 @@ const PaginationBody = ({ data }) => {
                       >
                         <button
                           onClick={() => handlePageClick(1)}
-                          className={`block w-full p-1 rounded-t ${
+                          className={`block tracking-[-7px] text-xl pr-[7px] pb-[2px] w-full rounded-t ${
                             filteredColorVariant?.colorVariant
                               ? `${filteredColorVariant?.colorVariant} ${filteredColorVariant?.hoverVariant}`
                               : "text-cyan-500 hover:bg-cyan-100"
                           }`}
                         >
-                          ⥪
+                          {"<<"}
                         </button>
                       </li>
                     ) : null}

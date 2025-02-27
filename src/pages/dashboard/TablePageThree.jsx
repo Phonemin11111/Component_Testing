@@ -10,6 +10,7 @@ import TestTwo from "../../components/test/TestTwo";
 import { useDispatch } from "react-redux";
 import { addUser } from "../../features/service/authSlice";
 import { useForm } from "react-hook-form";
+import Cookies from "js-cookie";
 
 const TablePageThree = () => {
   const { data } = useGetNormalItemListsQuery();
@@ -41,7 +42,7 @@ const TablePageThree = () => {
       value: {
         fontSize: 25,
         fontWeight: "bold",
-        captionVariant: "text-cyan-500",
+        captionVariant: "text-red-500",
       },
     },
     {
@@ -102,8 +103,12 @@ const TablePageThree = () => {
       value: {
         data: currentItems,
         dataLength: currentItems?.length,
-        deleteQuery: useGetDeletedItemMutation,
-        authenticator: "token",
+        eradicateMutation: useGetDeletedItemMutation,
+        // imitateMutation: "",
+        // abductMutation: "",
+        // editMutation: "",
+        authenticator: Cookies.get("token"),
+        // cookies: "token",
         param: "စားပြီးပြီလား",
       },
     },
@@ -186,8 +191,9 @@ const TablePageThree = () => {
             {
               id: "actionsVariant",
               actionsFlexType: "vertical",
+              verticalColumns: 3,
               actionsBetween: 8,
-              dataPosition: "items-center justify-center",
+              // dataPosition: "items-center justify-center",
             },
           ],
         },
@@ -198,10 +204,10 @@ const TablePageThree = () => {
               label: "Detail",
               onClick: (navigator, row) =>
                 navigator(`/cms-admin/tablePageDetail/${row.id}`),
-              icon: "✎",
+              icon: "👁",
               iconFlexType: "vertical",
               gapBetween: 4,
-              iconVariant: "text-yellow-500",
+              iconVariant: "text-gray-500",
               dataVariant: "text-yellow-500 hover:text-yellow-700",
             },
             {
@@ -214,11 +220,29 @@ const TablePageThree = () => {
             },
             {
               label: "Favorite",
-              onClick: (abductor, row) => abductor(row?.id),
+              onClick: (abductor, row) => abductor(row),
               icon: "❤︎",
               gapBetween: 4,
               iconVariant: "text-red-500",
               dataVariant: "text-yellow-500 hover:text-yellow-700",
+            },
+            {
+              label: "Copy",
+              onClick: (imitator, row) => imitator(row),
+              icon: "🗐",
+              gapBetween: 4,
+              iconVariant: "text-green-500",
+              dataVariant: "text-yellow-500 hover:text-yellow-700",
+              colSpan: 2,
+            },
+            {
+              label: "Edit",
+              onClick: (editor, row) => editor(row),
+              icon: "✎",
+              gapBetween: 4,
+              iconVariant: "text-yellow-500",
+              dataVariant: "text-yellow-500 hover:text-yellow-700",
+              colStart: 3,
             },
           ],
         },
@@ -261,9 +285,11 @@ const TablePageThree = () => {
 
   const paginationEngines = {
     pagination: "frontendMode",
-    goPage: true,
+    searchPage: true,
     perPage: true,
     // sorting: true,
+    // filter: true,
+    // searchbar: true,
   };
 
   const merges = [
@@ -352,22 +378,22 @@ const TablePageThree = () => {
         className=" flex flex-col gap-2.5 items-center justify-center"
       >
         <input
-          className="bg-cyan-500 px-2 py-1"
+          className="bg-cyan-500 px-3 py-1.5 rounded-2xl"
           {...register("username")}
           type="text"
           value="johnd"
         />
         <input
-          className="bg-cyan-500 px-2 py-1"
+          className="bg-cyan-500 px-3 py-1.5 rounded-2xl"
           {...register("password")}
           type="text"
           value="m38rmF$"
         />
         <span className=" flex flex-row items-center justify-center gap-2.5">
-          <button className="bg-cyan-500 px-2 py-1" type="submit">
+          <button className="bg-cyan-500 px-3 py-1.5 rounded-2xl" type="submit">
             Login
           </button>
-          <button className="bg-red-500 px-2 py-1" type="submit">
+          <button className="bg-red-500 px-3 py-1.5 rounded-2xl" disabled>
             Logout
           </button>
         </span>

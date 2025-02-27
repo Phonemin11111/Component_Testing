@@ -49,7 +49,7 @@ const TableGroup = ({ data, paginationCore }) => {
         ? `?${parentParam.replace(/"(\d+)"/g, "$1")}=${currentPage}`
         : `?page=${currentPage}`;
 
-      setSearchParams(newSearchParams);
+      setSearchParams(newSearchParams, { replace: false });
     }
   }, [currentPage, parentCurrentPage, setSearchParams, parentParam]);
 

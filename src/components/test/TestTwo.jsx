@@ -57,7 +57,7 @@ const TestTwo = () => {
 
         {isDropdownOpen && (
           <ul
-            className={`w-max absolute z-50 border p-2 ${verticalClass} ${horizontalClass} mt-1.5 bg-cyan-500`}
+            className={`w-max absolute z-50 border p-2 ${verticalClass} ${horizontalClass} mt-1 bg-cyan-500`}
           >
             <li>Dropdown One</li>
             <li>Dropdown Two</li>

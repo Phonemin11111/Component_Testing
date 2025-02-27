@@ -13,8 +13,9 @@ const PaginationLayout = ({ data }) => {
 
   const paginationEngines = paginationData?.paginationEngines;
   const theme = paginationData?.paginationVariant;
-  const filteredLayoutVariant = theme?.find((a) => a.key === "layoutVariant")
-    ?.value;
+  const filteredLayoutVariant = theme?.find(
+    (a) => a.key === "layoutVariant"
+  )?.value;
   const paginationPosition = filteredLayoutVariant?.find(
     (a) => a.id === "pagination"
   );
@@ -38,7 +39,7 @@ const PaginationLayout = ({ data }) => {
             <ItemPerPage data={data} />
           </span>
         )}
-        {paginationEngines && paginationEngines?.goPage !== false && (
+        {paginationEngines && paginationEngines?.searchPage !== false && (
           <span>
             <SearchPage data={data} />
           </span>

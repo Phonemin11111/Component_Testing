@@ -137,14 +137,18 @@ const ReusableTable = ({ data }) => {
     ?.flatMap((a) => a.actions || [])
     .find((a) => a.key === "data")?.value;
   const tableRows = tableData?.find((d) => d.key === "data")?.value?.data || [];
-  const deleteQuery =
-    tableData?.find((item) => item.key === "data")?.value?.deleteQuery || {};
+  const eradicateMutation =
+    tableData?.find((item) => item.key === "data")?.value?.eradicateMutation ||
+    {};
+  const cookies =
+    tableData?.find((item) => item.key === "data")?.value?.cookies || {};
   const authenticator =
     tableData?.find((item) => item.key === "data")?.value?.authenticator || {};
 
-  const token = getCookie(authenticator);
+  const token = authenticator?.length ? authenticator : getCookie(cookies);
   console.log(token !== null ? token : "no token yet");
-  const [deletedItem] = typeof deleteQuery === "function" ? deleteQuery() : [];
+  const [deletedItem] =
+    typeof eradicateMutation === "function" ? eradicateMutation() : [];
   const handleDelete = async (id) => {
     if (!deletedItem) {
       console.error("deletedItem is not defined"); // Debugging step
@@ -491,7 +495,7 @@ const ReusableTable = ({ data }) => {
         }
         return (
           <div
-            className={`inline-grid ${
+            className={`grid ${
               actionsManager?.dataPosition || "items-center justify-center"
             } ${
               actionsManager?.actionsFlexType === "horizontal"
@@ -503,7 +507,9 @@ const ReusableTable = ({ data }) => {
               ...(actionsManager?.actionsFlexType === "horizontal"
                 ? { gridTemplateRows: "repeat(1, auto)" }
                 : {
-                    gridTemplateColumns: "repeat(2, auto)",
+                    gridTemplateColumns: `repeat(${
+                      Number(actionsManager?.verticalColumns) || 2
+                    }, auto)`,
                   }),
             }}
           >
@@ -526,19 +532,27 @@ const ReusableTable = ({ data }) => {
                       action.onClick(row);
                     }
                   }}
-                  className={`flex col-span-1 items-center justify-center ${
-                    action.actionVariant || "text-gray-500 hover:text-gray-700"
+                  className={`flex ${
+                    action.dataVariant || "text-gray-500 hover:text-gray-700"
                   } ${
                     action.iconFlexType === "horizontal"
                       ? "flex-row"
                       : "flex-col"
                   }`}
-                  style={{ gap: `${action.gapBetween || 4}px` }}
+                  style={{
+                    gap: `${action.gapBetween || 4}px`,
+                    gridColumnStart: action?.colStart || "auto", // Set start position
+                    gridColumnEnd: action?.colSpan
+                      ? `span ${action.colSpan}`
+                      : "span 1", // Set span
+                  }}
                 >
                   {action.icon && (
-                    <span className={action.iconVariant}>{action.icon}</span>
+                    <span className={`${action.iconVariant}`}>
+                      {action.icon}
+                    </span>
                   )}
-                  {action.label}
+                  <span>{action.label}</span>
                 </button>
               );
             })}
