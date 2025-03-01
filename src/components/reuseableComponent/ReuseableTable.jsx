@@ -143,7 +143,7 @@ const ReusableTable = ({ data }) => {
   const cookies =
     tableData?.find((item) => item.key === "data")?.value?.cookies || {};
   const authenticator =
-    tableData?.find((item) => item.key === "data")?.value?.authenticator || {};
+    tableData?.find((item) => item.key === "data")?.value?.authorizer || {};
 
   const token = authenticator?.length ? authenticator : getCookie(cookies);
   console.log(token !== null ? token : "no token yet");

@@ -107,7 +107,7 @@ const TablePageThree = () => {
         // imitateMutation: "",
         // abductMutation: "",
         // editMutation: "",
-        authenticator: Cookies.get("token"),
+        authorizer: Cookies.get("token"),
         // cookies: "token",
         param: "စားပြီးပြီလား",
       },

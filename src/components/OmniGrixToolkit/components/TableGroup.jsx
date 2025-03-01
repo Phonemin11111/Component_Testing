@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useSearchParams } from "react-router";
-import ReusableTable from "./ReuseableTable";
-import PaginationLayout from "./reuseablePagination/PaginationLayout";
-import "../../CyanIC.css";
+import "../../../CyanIC.css";
+import PaginationLayout from "../../reuseableComponent/reuseablePagination/PaginationLayout";
+import ReusableTable from "../../reuseableComponent/ReuseableTable";
 
 const TableGroup = ({ data, paginationCore }) => {
   const tableDataArray = Array.isArray(data) ? data : [];
