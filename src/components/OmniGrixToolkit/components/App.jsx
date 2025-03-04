@@ -5,16 +5,22 @@ import TableGroup from "./TableGroup"; // Assuming TableGroup is a valid compone
 
 const App = ({
   tableData: dataArray,
-  paginationCore,
+  paginationCore: dataPaginate,
   dynamicApi,
   customEradicateMutation,
   customGetQuery,
 }) => {
   // Validate dataArray and ensure it's an array
   const tableDataArray = Array.isArray(dataArray) ? dataArray : [];
-
   const tableData = Object.fromEntries(
     tableDataArray.map((item) => [item.key, item.value])
+  );
+
+  const paginationArray = Array.isArray(dataPaginate) ? dataPaginate : [];
+  const paginationData = Object.fromEntries(
+    paginationArray.map((item) => {
+      return [item.key, item.value];
+    })
   );
 
   const extractIdentifierValue = (obj, identifierStr) => {
@@ -37,7 +43,7 @@ const App = ({
     ?.getQuery;
   const tableIdentifier = tableData?.data?.find((a) => a.key === "data").value
     ?.getQuery?.identifier;
-  const frontendMode = paginationCore?.pagination === "frontendMode";
+  const frontendMode = paginationData?.pagination === "frontendMode";
 
   const getCookie = (name) => {
     const cookies = document.cookie.split("; ");
@@ -52,17 +58,26 @@ const App = ({
   const [currentPage, setCurrentPage] = useState(1);
   const { useGetFetchedListsQuery, useDeleteItemMutation } = dynamicApi;
   // Use the built-in delete hook unless a custom one is provided.
+  const dynamicParams = {};
+
+  // Check if parent's mapping object has key 'page' then assign currentPage
+  if ("page" in tableIdentifier) {
+    dynamicParams[tableIdentifier.page] = currentPage;
+  }
+
+  // console.log(dynamicParams);
+
   const finalDeleteMutation = customEradicateMutation || useDeleteItemMutation;
   // Use the dynamically generated hook to fetch data.
   const defaultQuery = useGetFetchedListsQuery({
     token,
     frontendMode,
-    page: currentPage,
+    ...dynamicParams,
   });
   const customQuery = customGetQuery
     ? customGetQuery({
         token,
-        page: currentPage,
+        ...dynamicParams,
       })
     : null;
 
@@ -81,7 +96,6 @@ const App = ({
   const itemsLength = tableIdentifier?.length
     ? extractIdentifierValue(data, tableIdentifier.length)
     : data?.length;
-  console.log(tableIdentifier?.data, tableIdentifier?.length);
 
   if (isLoading && hasRestrictedKeys) return <div>Loading...</div>;
   if (error && hasRestrictedKeys) return <div>Error: {error.toString()}</div>;
@@ -117,7 +131,7 @@ const App = ({
 
   return (
     <div>
-      <TableGroup data={modifiedTableData} paginationCore={paginationCore} />
+      <TableGroup data={modifiedTableData} paginationCore={dataPaginate} />
     </div>
   );
 };

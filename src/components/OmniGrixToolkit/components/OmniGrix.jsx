@@ -52,33 +52,29 @@ const OmniGrix = ({ data, paginationCore }) => {
     ? eradicateMutation?.identifier || "id"
     : "";
 
-  console.log("Fetching Data:", endPoint, url, method);
-  console.log("Deleting Data:", eradicateUrl, eradicateMethod, identifier);
+  // console.log("Fetching Data:", endPoint, url, method);
+  // console.log("Deleting Data:", eradicateUrl, eradicateMethod, identifier);
 
   // Create dynamicApi.
-  const dynamicApi = useMemo(
-    () =>
-      createDynamicApi(
-        endPoint,
-        getBaseUrl,
-        url,
-        method,
-        eradicateBaseUrl,
-        eradicateUrl,
-        eradicateMethod,
-        identifier
-      ),
-    [
+  const dynamicApi = useMemo(() => {
+    return createDynamicApi(
       endPoint,
       getBaseUrl,
       url,
       method,
       eradicateBaseUrl,
       eradicateUrl,
-      eradicateMethod,
-      identifier,
-    ]
-  );
+      eradicateMethod
+    );
+  }, [
+    endPoint,
+    getBaseUrl,
+    url,
+    method,
+    eradicateBaseUrl,
+    eradicateUrl,
+    eradicateMethod,
+  ]);
 
   // Combine the API slices from eradicateMutation and getQuery if they exist.
   const combinedApiStore = useMemo(() => {

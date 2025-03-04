@@ -222,7 +222,7 @@ const PaginationBody = ({ data }) => {
                       >
                         <button
                           onClick={() => handlePageClick(totalPages)}
-                          className={`block tracking-[-7px] text-xl pr-[5px] pb-[2px] w-full  rounded-t ${
+                          className={`block tracking-[-7px] text-xl pr-[5px] pb-[3px] w-full  rounded-t ${
                             filteredColorVariant?.colorVariant
                               ? `${filteredColorVariant?.colorVariant} ${filteredColorVariant?.hoverVariant}`
                               : "text-cyan-500 hover:bg-cyan-100"
@@ -241,7 +241,7 @@ const PaginationBody = ({ data }) => {
                       >
                         <button
                           onClick={() => handlePageClick(1)}
-                          className={`block tracking-[-7px] text-xl pr-[7px] pb-[2px] w-full rounded-t ${
+                          className={`block tracking-[-7px] text-xl pr-[7px] pb-[3px] w-full rounded-t ${
                             filteredColorVariant?.colorVariant
                               ? `${filteredColorVariant?.colorVariant} ${filteredColorVariant?.hoverVariant}`
                               : "text-cyan-500 hover:bg-cyan-100"

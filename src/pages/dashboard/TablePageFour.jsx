@@ -291,14 +291,14 @@ export default TablePageFour;
 
 //___To Do____________
 //====================
-//1. Cell Manager {Text Background for status, cell width & height}
+//1. Cell Manager {column width & row height}
 //2. Action Separate Columns
 //[Drop] 3. Multi-Captions
-//[done] 4. Multi-Header rows/Add new cell
-//[done] 5. Multi-Footer rows/Add new cell
-//6. Add New Body row/cell
-//7. Checkbox Columns
+//[Done] 4. Multi-Header rows/Add new cell
+//[Done] 5. Multi-Footer rows/Add new cell
+//[Drop] 6. Add New Body row/cell
+//[Done] 7. Checkbox Columns
 //8. Colgroup/Advance Columns Manager
 //9. Rowgroup/Advance Row Manager
-//[done] 10. Pagination Core & Engines
-// 11. To show photo at cell.
+//[Done] 10. Pagination Core & Engines
+//[Done] 11. To show photo at cell.

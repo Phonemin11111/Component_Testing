@@ -9,20 +9,19 @@ export const createDynamicApi = (
   eradicateBaseUrl,
   eradicateUrl,
   eradicateMethod,
-  identifier,
   customDelete = false // if true, skip built-in delete endpoint
 ) => {
-  console.log("Creating API with parameters:", {
-    baseUrl,
-    getBaseUrl,
-    url,
-    method,
-    eradicateUrl,
-    eradicateBaseUrl,
-    eradicateMethod,
-    identifier,
-    customDelete,
-  });
+  // console.log("Creating API with parameters:", {
+  //   baseUrl,
+  //   getBaseUrl,
+  //   url,
+  //   method,
+  //   eradicateUrl,
+  //   eradicateBaseUrl,
+  //   eradicateMethod,
+  //   identifier,
+  //   customDelete,
+  // });
 
   return createApi({
     reducerPath: "dynamicApi",
@@ -31,13 +30,23 @@ export const createDynamicApi = (
     endpoints: (builder) => {
       const endpoints = {
         getFetchedLists: builder.query({
-          query: ({ page, frontendMode }) => {
-            // Conditionally append `page=${page}` to the URL based on frontendMode
+          query: ({ frontendMode, ...params }) => {
+            // Build the initial URL from getBaseUrl and the URL template.
             let queryUrl = `${getBaseUrl}${url}`;
             if (!frontendMode) {
-              queryUrl += `page=${page}`;
+              // Replace every occurrence of ${...} in queryUrl
+              queryUrl = queryUrl.replace(/\$\{([^}]+)\}/g, (match, key) => {
+                // Remove any extra dollar signs (if any) and trim the key.
+                const cleanedKey = key.replace(/\$/g, "").trim();
+                // Replace the placeholder with the corresponding value from params,
+                // or if not provided, leave it as an empty string.
+                return params[cleanedKey] !== undefined
+                  ? params[cleanedKey]
+                  : "";
+              });
+              // console.log(params);
             }
-            console.log("Fetching lists with URL:", url);
+            // console.log("Fetching lists with URL:", queryUrl);
             return {
               url: queryUrl,
               method: method,
@@ -47,14 +56,12 @@ export const createDynamicApi = (
         }),
       };
 
-      // Only add deleteItem if we're not using a custom hook
       if (!customDelete) {
         endpoints.deleteItem = builder.mutation({
-          // Accept an object containing the identifier value
           query: ({ id }) => {
-            console.log("Deleting item with URL:", `${eradicateUrl}${id}`);
+            // console.log("Deleting item with URL:", `${eradicateUrl}${id}`);
             return {
-              url: `${eradicateBaseUrl}${eradicateUrl}${id}`, // e.g. "products/1"
+              url: `${eradicateBaseUrl}${eradicateUrl}${id}`,
               method: eradicateMethod,
             };
           },
