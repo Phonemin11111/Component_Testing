@@ -17,7 +17,7 @@ const TablePageFour = () => {
         {
           id: "columnsVariant",
           dataVariant:
-            "bg-red-100 px-3 py-1 text-sm font-medium text-red-900 border-2 border-red-300",
+            "bg-red-100 px-3 py-1 text-sm font-medium text-red-900 border-red-300",
           dataPosition: "item-center justify-center gap-1",
         },
       ],
@@ -60,7 +60,7 @@ const TablePageFour = () => {
           id: "bodyVariant",
           dataColor: "bg-yellow-100 hover:bg-yellow-50",
           dataVariant:
-            "px-2 py-2 text-sm font-medium text-yellow-900 border-2 border-yellow-300 text-nowrap",
+            "px-2 py-2 text-sm font-medium text-yellow-900 border-yellow-300 text-nowrap",
           dataPosition: "item-center justify-center",
         },
       ],
@@ -84,7 +84,7 @@ const TablePageFour = () => {
         {
           id: "footerVariant",
           dataVariant:
-            "bg-gray-100 px-2 py-2 text-sm font-medium text-gray-900 border border-gray-300",
+            "bg-gray-100 px-2 py-2 text-sm font-medium text-gray-900 border-gray-300",
           dataPosition: "item-center justify-start",
         },
       ],

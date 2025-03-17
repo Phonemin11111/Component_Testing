@@ -30,7 +30,7 @@ const PaginationBody = ({ data }) => {
   const handleDropdownClick = (e, page) => {
     const buttonRect = e.target.getBoundingClientRect();
     const spaceBelow = window.innerHeight - buttonRect.bottom;
-    setPosition(spaceBelow >= 130 ? "bottom" : "top");
+    setPosition(spaceBelow >= 145 ? "bottom" : "top");
     setDropdownType((prev) => (prev === page ? null : page));
   };
 
@@ -214,7 +214,7 @@ const PaginationBody = ({ data }) => {
                   >
                     {page === "left" ? (
                       <li
-                        className={` border-b rounded-t p-0.5 ${
+                        className={` border-b rounded-t ${
                           filteredColorVariant?.colorVariant
                             ? `${filteredColorVariant?.colorVariant} ${filteredColorVariant?.hoverVariant}`
                             : "bg-white border-cyan-300"
@@ -233,7 +233,7 @@ const PaginationBody = ({ data }) => {
                       </li>
                     ) : page === "right" ? (
                       <li
-                        className={` border-b rounded-t p-0.5 ${
+                        className={` border-b rounded-t ${
                           filteredColorVariant?.colorVariant
                             ? `${filteredColorVariant?.colorVariant} ${filteredColorVariant?.hoverVariant}`
                             : "bg-white border-cyan-300"

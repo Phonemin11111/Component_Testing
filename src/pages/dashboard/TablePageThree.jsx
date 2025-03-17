@@ -58,8 +58,9 @@ const TablePageThree = () => {
         {
           id: "columnsVariant",
           dataVariant:
-            "bg-yellow-100 px-3 py-1 text-left text-sm font-medium text-yellow-900 border border-yellow-300",
+            "bg-yellow-100 px-3 py-1 text-left text-sm font-medium text-yellow-900 border-yellow-300",
           dataPosition: "item-center justify-center gap-1",
+          dataRadius: 8,
         },
       ],
     },
@@ -93,8 +94,9 @@ const TablePageThree = () => {
         {
           id: "bodyVariant",
           dataVariant:
-            "bg-yellow-100 px-2 py-2 text-left text-sm font-medium text-yellow-900 border border-yellow-300",
+            "bg-yellow-100 px-2 py-2 text-left text-sm font-medium text-yellow-900 border-yellow-300",
           dataPosition: "item-center justify-center",
+          dataRadius: { l: 8, r: 8 },
         },
       ],
     },
@@ -121,8 +123,9 @@ const TablePageThree = () => {
         {
           id: "footerVariant",
           dataVariant:
-            "bg-gray-100 px-2 py-2 text-sm font-medium text-gray-900 border border-gray-300",
+            "bg-gray-100 px-2 py-2 text-sm font-medium text-gray-900 border-gray-300",
           dataPosition: "item-center justify-end",
+          dataRadius: { l: 8, r: 8 },
         },
       ],
     },

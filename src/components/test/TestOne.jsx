@@ -9,8 +9,8 @@ import { store } from "../../features/app/store";
 import { pokeApi, useGetPokemonListsQuery } from "../../features/api/pokeApi";
 
 const TestOne = () => {
-  const { data } = useGetNormalItemListsQuery();
-  const currentItems = data;
+  // const { data } = useGetNormalItemListsQuery();
+  // const currentItems = data;
 
   const columns = [
     {
@@ -144,6 +144,7 @@ const TestOne = () => {
     { key: "merges", value: merges },
     { key: "perPage", value: 20 },
   ];
+
   return (
     <div>
       <OmniGrix data={tableData} paginationCore={paginationEngines} />

@@ -146,7 +146,6 @@ const ReusableTable = ({ data }) => {
     tableData?.find((item) => item.key === "data")?.value?.authorizer || {};
 
   const token = authenticator?.length ? authenticator : getCookie(cookies);
-  console.log(token !== null ? token : "no token yet");
   const [deletedItem] =
     typeof eradicateMutation === "function" ? eradicateMutation() : [];
   const handleDelete = async (id) => {
@@ -613,14 +612,39 @@ const ReusableTable = ({ data }) => {
                 false
               );
             }
+            const lastSpannedColumn =
+              colIndex + (mergeResult.props?.colSpan || 1) - 1;
+            // Check if this is the last cell (either naturally or due to merging)
+            const isLastCell = lastSpannedColumn === baseColumns.length - 1;
             return (
               <th
                 key={colIndex}
                 {...mergeResult.props}
+                style={{
+                  borderTopLeftRadius:
+                    headerRowIndex === 0 && colIndex === 0
+                      ? `${
+                          columnsManager?.dataRadius?.l
+                            ? columnsManager?.dataRadius?.l
+                            : columnsManager?.dataRadius || 0
+                        }px`
+                      : undefined,
+                  borderTopRightRadius:
+                    headerRowIndex === 0 &&
+                    (colIndex === baseColumns.length - 1 || isLastCell)
+                      ? `${
+                          columnsManager?.dataRadius?.r
+                            ? columnsManager?.dataRadius?.r
+                            : columnsManager?.dataRadius || 0
+                        }px`
+                      : undefined,
+                }}
                 className={`${
                   columnsManager?.dataVariant ||
-                  "px-4 py-2 text-left text-sm font-medium text-gray-700 border border-cyan-300"
-                }`}
+                  "px-4 py-2 text-left text-sm font-medium text-gray-700 border-cyan-300"
+                } ${colIndex === 0 ? "border-l" : ""} ${
+                  headerRowIndex === 0 ? "border-t" : ""
+                } border-b border-r`}
               >
                 <span
                   className={`flex flex-row ${
@@ -644,7 +668,7 @@ const ReusableTable = ({ data }) => {
       {tableRows.map((row, rowIndex) => (
         <tr
           key={rowIndex}
-          className={`${bodyManager?.dataColor || "hover:bg-cyan-50"}`}
+          className={`${bodyManager?.dataColor || "hover:bg-cyan-50 bg-white"}`}
         >
           {baseColumns.map((col, colIndex) => {
             if (!isColumnAllowed(col)) return null;
@@ -662,14 +686,40 @@ const ReusableTable = ({ data }) => {
                 false
               );
             }
+            const lastSpannedColumn =
+              colIndex + (mergeResult.props?.colSpan || 1) - 1;
+            // Check if this is the last cell (either naturally or due to merging)
+            const isLastCell = lastSpannedColumn === baseColumns.length - 1;
             return (
               <td
                 key={colIndex}
                 {...mergeResult.props}
+                style={{
+                  borderBottomLeftRadius:
+                    footersDataRaw?.length === 0 &&
+                    rowIndex === tableRows.length - 1 &&
+                    colIndex === 0
+                      ? `${
+                          bodyManager?.dataRadius?.l
+                            ? bodyManager?.dataRadius?.l
+                            : bodyManager?.dataRadius || 0
+                        }px`
+                      : undefined,
+                  borderBottomRightRadius:
+                    footersDataRaw?.length === 0 &&
+                    rowIndex === tableRows.length - 1 &&
+                    (colIndex === baseColumns.length - 1 || isLastCell)
+                      ? `${
+                          bodyManager?.dataRadius?.r
+                            ? bodyManager?.dataRadius?.r
+                            : bodyManager?.dataRadius || 0
+                        }px`
+                      : undefined,
+                }}
                 className={`${
                   bodyManager?.dataVariant ||
-                  "px-4 py-2 text-sm text-gray-600 border border-cyan-300"
-                }`}
+                  "px-4 py-2 text-sm text-gray-600 border-cyan-300"
+                } border-b border-r first:border-l`}
               >
                 <span
                   className={`flex flex-row ${
@@ -735,14 +785,41 @@ const ReusableTable = ({ data }) => {
                   </button>
                 );
             }
+            // Compute last spanned column index
+            const lastSpannedColumn =
+              colIndex + (mergeResult.props?.colSpan || 1) - 1;
+            // Check if this is the last cell (either naturally or due to merging)
+            const isLastCell = lastSpannedColumn === baseColumns.length - 1;
             return (
               <td
                 key={colIndex}
                 {...mergeResult.props}
+                style={{
+                  borderBottomLeftRadius:
+                    footersDataRaw?.length > 0 &&
+                    footerRowIndex === processedFooterRows.length - 1 &&
+                    colIndex === 0
+                      ? `${
+                          footersManager?.dataRadius?.l
+                            ? footersManager?.dataRadius?.l
+                            : footersManager?.dataRadius || 0
+                        }px`
+                      : undefined,
+                  borderBottomRightRadius:
+                    footersDataRaw?.length > 0 &&
+                    footerRowIndex === processedFooterRows.length - 1 &&
+                    (colIndex === baseColumns.length - 1 || isLastCell)
+                      ? `${
+                          footersManager?.dataRadius?.r
+                            ? footersManager?.dataRadius?.r
+                            : footersManager?.dataRadius || 0
+                        }px`
+                      : undefined,
+                }}
                 className={`${
                   footersManager?.dataVariant ||
-                  "px-4 py-2 text-left text-sm font-medium text-gray-700 border border-cyan-300 bg-cyan-50"
-                }`}
+                  "px-4 py-2 text-left text-sm font-medium text-gray-700 border-cyan-300 bg-cyan-50"
+                } border-b border-r first:border-l`}
               >
                 <span
                   className={`flex flex-row ${
@@ -762,8 +839,8 @@ const ReusableTable = ({ data }) => {
 
   return (
     <div className="overflow-auto w-full custom-scrollbar">
-      <table className="w-full table-auto border-collapse">
-        {renderCaption()}
+      <table className="w-full table-auto border-separate border-spacing-0">
+        {captionData?.length > 0 && renderCaption()}
         {renderHeader()}
         {renderBody()}
         {footersDataRaw?.length > 0 && renderFooter()}
