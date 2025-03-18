@@ -57,10 +57,29 @@ const TablePageThree = () => {
       value: [
         {
           id: "columnsVariant",
+          dataColor: "bg-yellow-100",
           dataVariant:
-            "bg-yellow-100 px-3 py-1 text-left text-sm font-medium text-yellow-900 border-yellow-300",
+            " px-3 py-1 text-left text-sm font-medium text-yellow-900 border-yellow-300",
           dataPosition: "item-center justify-center gap-1",
           dataRadius: 8,
+        },
+        {
+          id: "headerCell",
+          coordination: { x: [7, 8], y: 0 },
+          dataVariant: "border-r-0 text-red-500 bg-red-900 text-xl font-bold",
+          dataPosition: "items-start justify-end",
+        },
+        {
+          id: "headerCell",
+          coordination: { x: [6, 7], y: 1 },
+          dataVariant: "border-r-0 text-blue-500 bg-blue-900 text-xs font-thin",
+          dataPosition: "items-end justify-start",
+        },
+        {
+          id: "headerCell",
+          coordination: { x: 4, y: [0, 1] },
+          dataVariant: "border-b-0 text-white bg-black text-xl",
+          dataPosition: "items-start justify-start",
         },
       ],
     },
@@ -93,10 +112,29 @@ const TablePageThree = () => {
       value: [
         {
           id: "bodyVariant",
+          dataColor: "bg-yellow-100",
           dataVariant:
-            "bg-yellow-100 px-2 py-2 text-left text-sm font-medium text-yellow-900 border-yellow-300",
+            "px-2 py-2 text-left text-sm font-medium text-yellow-900 border-yellow-300",
           dataPosition: "item-center justify-center",
           dataRadius: { l: 8, r: 8 },
+        },
+        {
+          id: "bodyCell",
+          coordination: { x: [7, 8], y: 0 },
+          dataVariant: "border-r-0 text-red-500 bg-red-900 text-xl font-bold",
+          dataPosition: "items-start justify-end",
+        },
+        {
+          id: "bodyCell",
+          coordination: { x: [1, 2, 5], y: 2 },
+          dataVariant: "border-b-0 text-blue-500 bg-blue-900 text-xs font-thin",
+          dataPosition: "items-end justify-start",
+        },
+        {
+          id: "bodyCell",
+          coordination: { x: 4, y: [1, 3] },
+          dataVariant: "border-r-0 text-white bg-black text-xl",
+          dataPosition: "items-start justify-start",
         },
       ],
     },
@@ -122,10 +160,29 @@ const TablePageThree = () => {
       value: [
         {
           id: "footerVariant",
+          dataColor: "bg-gray-100",
           dataVariant:
-            "bg-gray-100 px-2 py-2 text-sm font-medium text-gray-900 border-gray-300",
+            " px-2 py-2 text-sm font-medium text-gray-900 border-gray-300",
           dataPosition: "item-center justify-end",
           dataRadius: { l: 8, r: 8 },
+        },
+        {
+          id: "footerCell",
+          coordination: { x: [0, 1], y: [6, 7] },
+          dataVariant: "border-r-0 text-white bg-gray-500 text-xl",
+          dataPosition: "items-start justify-start",
+        },
+        {
+          id: "footerCell",
+          coordination: { x: 4, y: 6 },
+          dataVariant: "border-r-0 border-b-0 text-white bg-cyan-500 text-xl",
+          dataPosition: "items-start justify-start",
+        },
+        {
+          id: "footerCell",
+          coordination: { x: 5, y: 7 },
+          dataVariant: "border-r-0 text-white bg-amber-500 text-xl",
+          dataPosition: "items-start justify-start",
         },
       ],
     },
@@ -164,6 +221,14 @@ const TablePageThree = () => {
         [
           { footer: "Total Item Count", col: 0 },
           { footer: currentItems?.length, col: 5 },
+        ],
+        [
+          { footer: "စမ်းကြည့်တာ။", col: 0 },
+          { footer: "အောင်မြင်တယ်ကွ။", col: 4 },
+        ],
+        [
+          { footer: "ကျေနပ်လား။", col: 2 },
+          { footer: "မကျေနပ်လဲ မတတ်နိုင်ဘူး။", col: 5 },
         ],
       ],
     },

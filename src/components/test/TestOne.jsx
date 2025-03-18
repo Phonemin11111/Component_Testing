@@ -93,6 +93,33 @@ const TestOne = () => {
     },
   ];
 
+  const footers = [
+    {
+      key: "manager",
+      value: [
+        {
+          id: "footerCell",
+          coordination: { x: [0, 1], y: 0 },
+          dataVariant: "border-r-0",
+        },
+        {
+          id: "footerCell",
+          coordination: { x: [3, 4, 5, 6, 7, 8], y: 0 },
+          dataVariant: "border-r-0",
+        },
+      ],
+    },
+    {
+      key: "data",
+      value: [
+        [
+          { footer: "Total Items", col: 2 },
+          { footer: true, identifier: "data?.length", col: 4 },
+        ],
+      ],
+    },
+  ];
+
   const action = [
     {
       actions: [
@@ -140,6 +167,7 @@ const TestOne = () => {
   const tableData = [
     { key: "columns", value: columns },
     { key: "data", value: bodyData },
+    { key: "footers", value: footers },
     { key: "action", value: action },
     { key: "merges", value: merges },
     { key: "perPage", value: 20 },

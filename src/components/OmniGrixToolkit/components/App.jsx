@@ -1,6 +1,6 @@
 // App.jsx
 import React, { useState } from "react";
-import PropTypes from "prop-types";
+import PropTypes, { bool } from "prop-types";
 import TableGroup from "./TableGroup"; // Assuming TableGroup is a valid component
 
 const App = ({
@@ -123,6 +123,32 @@ const App = ({
             };
           }
           return item;
+        }),
+      };
+    }
+    if (section.key === "footers") {
+      return {
+        ...section,
+        value: section.value.map((footerItem) => {
+          if (footerItem.key === "data") {
+            return {
+              ...footerItem,
+              value: footerItem.value.map((row) =>
+                row.map((cell) => {
+                  if (cell.footer === true && cell.identifier !== undefined) {
+                    // Compute the dynamic footer value based on the cell's identifier.
+                    const computedFooter = extractIdentifierValue(
+                      data,
+                      cell.identifier
+                    );
+                    return { ...cell, footer: computedFooter };
+                  }
+                  return cell;
+                })
+              ),
+            };
+          }
+          return footerItem;
         }),
       };
     }
