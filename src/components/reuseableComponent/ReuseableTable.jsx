@@ -180,6 +180,9 @@ const ReusableTable = ({ data }) => {
   const themeManager = theme
     ?.find((a) => a.key === "layoutVariant")
     ?.value?.find((a) => a.id === "caption");
+  const tableManager = theme
+    ?.find((a) => a.key === "layoutVariant")
+    ?.value?.find((a) => a.id === "table");
   const columnsManager = getSectionManager(columns, "columnsVariant");
   const bodyManager = getSectionManager(tableData, "bodyVariant");
   const actionsManager = action
@@ -627,22 +630,39 @@ const ReusableTable = ({ data }) => {
             // Check if this is the last cell (either naturally or due to merging)
             const isLastCell = lastSpannedColumn === baseColumns.length - 1;
             //fakeMerge function
+            const getCoordinationCondition = (coordValue, index) => {
+              // If undefined, return true (no condition applied)
+              if (coordValue === undefined) return true;
+              // If it's an array, return true if any item in the array matches the index.
+              if (Array.isArray(coordValue)) {
+                return coordValue.some((item) =>
+                  getCoordinationCondition(item, index)
+                );
+              }
+              // If it's an object with 'from' and 'to' properties, check the range.
+              if (
+                typeof coordValue === "object" &&
+                coordValue !== null &&
+                "from" in coordValue &&
+                "to" in coordValue
+              ) {
+                return index >= coordValue.from && index <= coordValue.to;
+              }
+              // Otherwise, assume it's a number.
+              return coordValue === index;
+            };
+            // Filter managers based on the coordination conditions for both x and y.
+            // This now handles numbers, range objects, or arrays containing either.
             const matchingHeaderCellManagers = headerCellManagers?.filter(
               (manager) => {
-                const xCondition =
-                  manager?.coordination?.x !== undefined
-                    ? Array.isArray(manager.coordination.x)
-                      ? manager.coordination.x.includes(colIndex)
-                      : manager.coordination.x === colIndex
-                    : true;
-
-                const yCondition =
-                  manager?.coordination?.y !== undefined
-                    ? Array.isArray(manager.coordination.y)
-                      ? manager.coordination.y.includes(headerRowIndex)
-                      : manager.coordination.y === headerRowIndex
-                    : true;
-
+                const xCondition = getCoordinationCondition(
+                  manager?.coordination?.x,
+                  colIndex
+                );
+                const yCondition = getCoordinationCondition(
+                  manager?.coordination?.y,
+                  headerRowIndex
+                );
                 return xCondition && yCondition;
               }
             );
@@ -658,31 +678,57 @@ const ReusableTable = ({ data }) => {
               <th
                 key={colIndex}
                 {...mergeResult.props}
-                style={{
-                  borderTopLeftRadius:
-                    headerRowIndex === 0 && colIndex === 0
-                      ? `${
-                          columnsManager?.dataRadius?.l
-                            ? columnsManager?.dataRadius?.l
-                            : columnsManager?.dataRadius || 0
-                        }px`
-                      : undefined,
-                  borderTopRightRadius:
-                    headerRowIndex === 0 &&
-                    (colIndex === baseColumns.length - 1 || isLastCell)
-                      ? `${
-                          columnsManager?.dataRadius?.r
-                            ? columnsManager?.dataRadius?.r
-                            : columnsManager?.dataRadius || 0
-                        }px`
-                      : undefined,
-                }}
+                style={
+                  tableManager?.dataRadius != undefined
+                    ? {
+                        borderTopLeftRadius:
+                          headerRowIndex === 0 && colIndex === 0
+                            ? `${
+                                tableManager?.dataRadius?.tl
+                                  ? tableManager?.dataRadius?.tl
+                                  : tableManager?.dataRadius?.t
+                                  ? tableManager?.dataRadius?.t
+                                  : tableManager?.dataRadius || 0
+                              }px`
+                            : undefined,
+                        borderTopRightRadius:
+                          headerRowIndex === 0 &&
+                          (colIndex === baseColumns.length - 1 || isLastCell)
+                            ? `${
+                                tableManager?.dataRadius?.tr
+                                  ? tableManager?.dataRadius?.tr
+                                  : tableManager?.dataRadius?.t
+                                  ? tableManager?.dataRadius?.t
+                                  : tableManager?.dataRadius || 0
+                              }px`
+                            : undefined,
+                      }
+                    : undefined
+                }
                 className={`${
                   columnsManager?.dataVariant ||
                   "px-4 py-2 text-left text-sm font-medium text-gray-700 border-cyan-300"
-                } ${colIndex === 0 ? "border-l" : ""} ${
-                  headerRowIndex === 0 ? "border-t" : ""
-                } border-b border-r ${combinedHeaderVariant}`}
+                } ${
+                  (typeof tableManager?.dataSpacing !== "object" &&
+                    tableManager?.dataSpacing !== undefined &&
+                    tableManager?.dataSpacing > 0) ||
+                  (tableManager?.dataSpacing?.x > 0 &&
+                    tableManager?.dataSpacing?.y > 0)
+                    ? "border"
+                    : `${
+                        tableManager?.dataSpacing?.x > 0
+                          ? "border-l"
+                          : colIndex === 0
+                          ? "border-l"
+                          : ""
+                      } ${
+                        tableManager?.dataSpacing?.y > 0
+                          ? "border-t"
+                          : headerRowIndex === 0
+                          ? "border-t"
+                          : ""
+                      } border-b border-r`
+                } ${combinedHeaderVariant}`}
               >
                 <span
                   className={`flex flex-row ${
@@ -729,22 +775,39 @@ const ReusableTable = ({ data }) => {
             // Check if this is the last cell (either naturally or due to merging)
             const isLastCell = lastSpannedColumn === baseColumns.length - 1;
             //fakeMerge function
+            const getCoordinationCondition = (coordValue, index) => {
+              // If undefined, return true (no condition applied)
+              if (coordValue === undefined) return true;
+              // If it's an array, return true if any item in the array matches the index.
+              if (Array.isArray(coordValue)) {
+                return coordValue.some((item) =>
+                  getCoordinationCondition(item, index)
+                );
+              }
+              // If it's an object with 'from' and 'to' properties, check the range.
+              if (
+                typeof coordValue === "object" &&
+                coordValue !== null &&
+                "from" in coordValue &&
+                "to" in coordValue
+              ) {
+                return index >= coordValue.from && index <= coordValue.to;
+              }
+              // Otherwise, assume it's a number.
+              return coordValue === index;
+            };
+            // Filter managers based on the coordination conditions for both x and y.
+            // This now handles numbers, range objects, or arrays containing either.
             const matchingBodyCellManagers = bodyCellManagers?.filter(
               (manager) => {
-                const xCondition =
-                  manager?.coordination?.x !== undefined
-                    ? Array.isArray(manager.coordination.x)
-                      ? manager.coordination.x.includes(colIndex)
-                      : manager.coordination.x === colIndex
-                    : true;
-
-                const yCondition =
-                  manager?.coordination?.y !== undefined
-                    ? Array.isArray(manager.coordination.y)
-                      ? manager.coordination.y.includes(rowIndex)
-                      : manager.coordination.y === rowIndex
-                    : true;
-
+                const xCondition = getCoordinationCondition(
+                  manager?.coordination?.x,
+                  colIndex
+                );
+                const yCondition = getCoordinationCondition(
+                  manager?.coordination?.y,
+                  rowIndex
+                );
                 return xCondition && yCondition;
               }
             );
@@ -760,32 +823,54 @@ const ReusableTable = ({ data }) => {
               <td
                 key={colIndex}
                 {...mergeResult.props}
-                style={{
-                  borderBottomLeftRadius:
-                    footersDataRaw?.length === 0 &&
-                    rowIndex === tableRows.length - 1 &&
-                    colIndex === 0
-                      ? `${
-                          bodyManager?.dataRadius?.l
-                            ? bodyManager?.dataRadius?.l
-                            : bodyManager?.dataRadius || 0
-                        }px`
-                      : undefined,
-                  borderBottomRightRadius:
-                    footersDataRaw?.length === 0 &&
-                    rowIndex === tableRows.length - 1 &&
-                    (colIndex === baseColumns.length - 1 || isLastCell)
-                      ? `${
-                          bodyManager?.dataRadius?.r
-                            ? bodyManager?.dataRadius?.r
-                            : bodyManager?.dataRadius || 0
-                        }px`
-                      : undefined,
-                }}
+                style={
+                  tableManager?.dataRadius != undefined
+                    ? {
+                        borderBottomLeftRadius:
+                          footersDataRaw?.length === 0 &&
+                          rowIndex === tableRows.length - 1 &&
+                          colIndex === 0
+                            ? `${
+                                tableManager?.dataRadius?.bl
+                                  ? tableManager?.dataRadius?.bl
+                                  : tableManager?.dataRadius?.b
+                                  ? tableManager?.dataRadius?.b
+                                  : tableManager?.dataRadius || 0
+                              }px`
+                            : undefined,
+                        borderBottomRightRadius:
+                          footersDataRaw?.length === 0 &&
+                          rowIndex === tableRows.length - 1 &&
+                          (colIndex === baseColumns.length - 1 || isLastCell)
+                            ? `${
+                                tableManager?.dataRadius?.br
+                                  ? tableManager?.dataRadius?.br
+                                  : tableManager?.dataRadius?.b
+                                  ? tableManager?.dataRadius?.b
+                                  : tableManager?.dataRadius || 0
+                              }px`
+                            : undefined,
+                      }
+                    : undefined
+                }
                 className={`${
                   bodyManager?.dataVariant ||
                   "px-4 py-2 text-sm text-gray-600 border-cyan-300"
-                } border-b border-r first:border-l ${combinedDataVariant}`}
+                } ${
+                  (typeof tableManager?.dataSpacing !== "object" &&
+                    tableManager?.dataSpacing !== undefined &&
+                    tableManager?.dataSpacing > 0) ||
+                  (tableManager?.dataSpacing?.x > 0 &&
+                    tableManager?.dataSpacing?.y > 0)
+                    ? "border"
+                    : `border-b border-r ${
+                        tableManager?.dataSpacing?.y > 0 ? "border-t" : ""
+                      } ${
+                        tableManager?.dataSpacing?.x > 0
+                          ? "border-l"
+                          : "first:border-l"
+                      }`
+                } ${combinedDataVariant}`}
               >
                 <span
                   className={`flex flex-row ${
@@ -859,31 +944,48 @@ const ReusableTable = ({ data }) => {
               colIndex + (mergeResult.props?.colSpan || 1) - 1;
             // Check if this is the last cell (either naturally or due to merging)
             const isLastCell = lastSpannedColumn === baseColumns.length - 1;
+            //fakeMerge function
+            const getCoordinationCondition = (coordValue, index) => {
+              // If undefined, return true (no condition applied)
+              if (coordValue === undefined) return true;
+              // If it's an array, return true if any item in the array matches the index.
+              if (Array.isArray(coordValue)) {
+                return coordValue.some((item) =>
+                  getCoordinationCondition(item, index)
+                );
+              }
+              // If it's an object with 'from' and 'to' properties, check the range.
+              if (
+                typeof coordValue === "object" &&
+                coordValue !== null &&
+                "from" in coordValue &&
+                "to" in coordValue
+              ) {
+                return index >= coordValue.from && index <= coordValue.to;
+              }
+              // Otherwise, assume it's a number.
+              return coordValue === index;
+            };
+            // Filter managers based on the coordination conditions for both x and y.
+            // This now handles numbers, range objects, or arrays containing either.
             const matchingFooterCellManagers = footerCellManagers?.filter(
               (manager) => {
-                const xCondition =
-                  manager?.coordination?.x !== undefined
-                    ? Array.isArray(manager.coordination.x)
-                      ? manager.coordination.x.includes(colIndex)
-                      : manager.coordination.x === colIndex
-                    : true;
-
-                const yCondition =
-                  manager?.coordination?.y !== undefined
-                    ? Array.isArray(manager.coordination.y)
-                      ? manager.coordination.y.includes(footerRowIndex)
-                      : manager.coordination.y === footerRowIndex
-                    : true;
-
+                const xCondition = getCoordinationCondition(
+                  manager?.coordination?.x,
+                  colIndex
+                );
+                const yCondition = getCoordinationCondition(
+                  manager?.coordination?.y,
+                  footerRowIndex
+                );
                 return xCondition && yCondition;
               }
             );
-            // Combine the classes for dataVariant (for one parent)
+            // Combine the class names for dataVariant (to be used in one parent element)
             const combinedFooterVariant = matchingFooterCellManagers
               ?.map((manager) => manager.dataVariant)
               .join(" ");
-
-            // Combine the classes for dataPosition (for another parent)
+            // Combine the class names for dataPosition (to be used in another parent element)
             const combinedFooterPosition = matchingFooterCellManagers
               ?.map((manager) => manager.dataPosition)
               .join(" ");
@@ -891,32 +993,54 @@ const ReusableTable = ({ data }) => {
               <td
                 key={colIndex}
                 {...mergeResult.props}
-                style={{
-                  borderBottomLeftRadius:
-                    footersDataRaw?.length > 0 &&
-                    footerRowIndex === processedFooterRows.length - 1 &&
-                    colIndex === 0
-                      ? `${
-                          footersManager?.dataRadius?.l
-                            ? footersManager?.dataRadius?.l
-                            : footersManager?.dataRadius || 0
-                        }px`
-                      : undefined,
-                  borderBottomRightRadius:
-                    footersDataRaw?.length > 0 &&
-                    footerRowIndex === processedFooterRows.length - 1 &&
-                    (colIndex === baseColumns.length - 1 || isLastCell)
-                      ? `${
-                          footersManager?.dataRadius?.r
-                            ? footersManager?.dataRadius?.r
-                            : footersManager?.dataRadius || 0
-                        }px`
-                      : undefined,
-                }}
+                style={
+                  tableManager?.dataRadius != undefined
+                    ? {
+                        borderBottomLeftRadius:
+                          footersDataRaw?.length > 0 &&
+                          footerRowIndex === processedFooterRows.length - 1 &&
+                          colIndex === 0
+                            ? `${
+                                tableManager?.dataRadius?.bl
+                                  ? tableManager?.dataRadius?.bl
+                                  : tableManager?.dataRadius?.b
+                                  ? tableManager?.dataRadius?.b
+                                  : tableManager?.dataRadius || 0
+                              }px`
+                            : undefined,
+                        borderBottomRightRadius:
+                          footersDataRaw?.length > 0 &&
+                          footerRowIndex === processedFooterRows.length - 1 &&
+                          (colIndex === baseColumns.length - 1 || isLastCell)
+                            ? `${
+                                tableManager?.dataRadius?.br
+                                  ? tableManager?.dataRadius?.br
+                                  : tableManager?.dataRadius?.b
+                                  ? tableManager?.dataRadius?.b
+                                  : tableManager?.dataRadius || 0
+                              }px`
+                            : undefined,
+                      }
+                    : undefined
+                }
                 className={`${
                   footersManager?.dataVariant ||
                   "px-4 py-2 text-left text-sm font-medium text-gray-700 border-cyan-300"
-                } border-b border-r first:border-l ${combinedFooterVariant}`}
+                } ${
+                  (typeof tableManager?.dataSpacing !== "object" &&
+                    tableManager?.dataSpacing !== undefined &&
+                    tableManager?.dataSpacing > 0) ||
+                  (tableManager?.dataSpacing?.x > 0 &&
+                    tableManager?.dataSpacing?.y > 0)
+                    ? "border"
+                    : `border-b border-r ${
+                        tableManager?.dataSpacing?.y > 0 ? "border-t" : ""
+                      } ${
+                        tableManager?.dataSpacing?.x > 0
+                          ? "border-l"
+                          : "first:border-l"
+                      }`
+                } ${combinedFooterVariant}`}
               >
                 <span
                   className={`flex flex-row ${
@@ -936,7 +1060,20 @@ const ReusableTable = ({ data }) => {
 
   return (
     <div className="overflow-auto w-full custom-scrollbar">
-      <table className="w-full table-auto border-separate border-spacing-0">
+      <table
+        className="w-full table-auto border-separate"
+        style={{
+          borderSpacing: `${
+            typeof tableManager?.dataSpacing === "object"
+              ? tableManager.dataSpacing.x ?? 0
+              : tableManager?.dataSpacing ?? 0
+          }px ${
+            typeof tableManager?.dataSpacing === "object"
+              ? tableManager.dataSpacing.y ?? 0
+              : tableManager?.dataSpacing ?? 0
+          }px`,
+        }}
+      >
         {captionData?.length > 0 && renderCaption()}
         {renderHeader()}
         {renderBody()}

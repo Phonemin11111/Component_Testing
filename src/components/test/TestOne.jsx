@@ -97,16 +97,11 @@ const TestOne = () => {
     {
       key: "manager",
       value: [
-        {
-          id: "footerCell",
-          coordination: { x: [0, 1], y: 0 },
-          dataVariant: "border-r-0",
-        },
-        {
-          id: "footerCell",
-          coordination: { x: [3, 4, 5, 6, 7, 8], y: 0 },
-          dataVariant: "border-r-0",
-        },
+        // {
+        //   id: "footerCell",
+        //   coordination: { x: [0, 1, { from: 3, to: 8 }], y: 0 },
+        //   dataVariant: "border-r-0",
+        // },
       ],
     },
     {
@@ -143,6 +138,13 @@ const TestOne = () => {
     },
   ];
 
+  const themeManager = [
+    {
+      key: "layoutVariant",
+      value: [{ id: "table", dataRadius: 8, dataSpacing: 4 }],
+    },
+  ];
+
   const merges = [
     {
       key: "data",
@@ -169,6 +171,7 @@ const TestOne = () => {
     { key: "data", value: bodyData },
     { key: "footers", value: footers },
     { key: "action", value: action },
+    { key: "themeManager", value: themeManager },
     { key: "merges", value: merges },
     { key: "perPage", value: 20 },
   ];

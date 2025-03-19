@@ -1,6 +1,7 @@
 import DashboardLayout from "../components/dashboard/DashboardLayout";
 import TestOne from "../components/test/TestOne";
 import TestTwo from "../components/test/TestTwo";
+import Calculator from "../pages/dashboard/Calculator";
 import Home from "../pages/dashboard/Home";
 import TablePageCopy from "../pages/dashboard/TablePageCopy";
 import TablePageDetail from "../pages/dashboard/TablePageDetail";
@@ -51,6 +52,10 @@ const dashboardRoute = [
       {
         path: "/cms-admin/tablePageDetail/:id",
         element: <TablePageDetail />,
+      },
+      {
+        path: "/cms-admin/calculator",
+        element: <Calculator />,
       },
     ],
   },

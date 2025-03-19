@@ -59,9 +59,8 @@ const TablePageThree = () => {
           id: "columnsVariant",
           dataColor: "bg-yellow-100",
           dataVariant:
-            " px-3 py-1 text-left text-sm font-medium text-yellow-900 border-yellow-300",
+            " px-3 py-1 text-left text-sm font-medium text-yellow-900 border-yellow-300 rounded-xl",
           dataPosition: "item-center justify-center gap-1",
-          dataRadius: 8,
         },
         {
           id: "headerCell",
@@ -114,9 +113,8 @@ const TablePageThree = () => {
           id: "bodyVariant",
           dataColor: "bg-yellow-100",
           dataVariant:
-            "px-2 py-2 text-left text-sm font-medium text-yellow-900 border-yellow-300",
+            "px-2 py-2 text-left text-sm font-medium text-yellow-900 border-yellow-300 rounded-xl",
           dataPosition: "item-center justify-center",
-          dataRadius: { l: 8, r: 8 },
         },
         {
           id: "bodyCell",
@@ -134,6 +132,12 @@ const TablePageThree = () => {
           id: "bodyCell",
           coordination: { x: 4, y: [1, 3] },
           dataVariant: "border-r-0 text-white bg-black text-xl",
+          dataPosition: "items-start justify-start",
+        },
+        {
+          id: "bodyCell",
+          coordination: { x: 0, y: [0, 1, { from: 2, to: 19 }] },
+          dataVariant: "border-r-0 border-b-0",
           dataPosition: "items-start justify-start",
         },
       ],
@@ -162,9 +166,8 @@ const TablePageThree = () => {
           id: "footerVariant",
           dataColor: "bg-gray-100",
           dataVariant:
-            " px-2 py-2 text-sm font-medium text-gray-900 border-gray-300",
+            " px-2 py-2 text-sm font-medium text-gray-900 border-gray-300 rounded-xl",
           dataPosition: "item-center justify-end",
-          dataRadius: { l: 8, r: 8 },
         },
         {
           id: "footerCell",
@@ -329,6 +332,11 @@ const TablePageThree = () => {
           gapBelow: 20,
         },
         {
+          id: "table",
+          dataRadius: { tl: 18, tr: 18, bl: 18, br: 18 },
+          dataSpacing: { x: 8, y: 8 },
+        },
+        {
           id: "pagination",
           dataPosition: "justify-center md:justify-end",
           gapAbove: 20,
@@ -397,6 +405,7 @@ const TablePageThree = () => {
         { type: "footer", startRow: 4, startCol: 4, colSpan: 6, rowSpan: 1 },
         { type: "footer", startRow: 5, startCol: 0, colSpan: 5, rowSpan: 1 },
         { type: "footer", startRow: 5, startCol: 5, colSpan: 5, rowSpan: 1 },
+        { type: "footer", startRow: 7, startCol: 3, colSpan: 2, rowSpan: 1 },
       ],
     },
   ];
