@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import PropTypes, { bool } from "prop-types";
 import TableGroup from "./TableGroup"; // Assuming TableGroup is a valid component
+import Skeleton from "./Skeleton";
 
 const App = ({
   tableData: dataArray,
@@ -97,9 +98,6 @@ const App = ({
     ? extractIdentifierValue(data, tableIdentifier.length)
     : data?.length;
 
-  if (isLoading && hasRestrictedKeys) return <div>Loading...</div>;
-  if (error && hasRestrictedKeys) return <div>Error: {error.toString()}</div>;
-
   // Modify tableData and pass along the appropriate delete mutation hook.
   const modifiedTableData = tableDataArray.map((section) => {
     if (section.key === "data") {
@@ -157,7 +155,12 @@ const App = ({
 
   return (
     <div>
-      <TableGroup data={modifiedTableData} paginationCore={dataPaginate} />
+      {(isLoading && hasRestrictedKeys) || (error && hasRestrictedKeys) ? (
+        <Skeleton data={modifiedTableData} paginationCore={dataPaginate} />
+      ) : undefined}
+      {isLoading && hasRestrictedKeys ? undefined : (
+        <TableGroup data={modifiedTableData} paginationCore={dataPaginate} />
+      )}
     </div>
   );
 };

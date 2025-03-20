@@ -187,8 +187,7 @@ const ReusableTable = ({ data }) => {
   const bodyManager = getSectionManager(tableData, "bodyVariant");
   const actionsManager = action
     ?.flatMap((a) => a.actions || [])
-    ?.find((a) => a.key === "manager")
-    ?.value?.find((item) => item.id === "actionsVariant");
+    ?.find((a) => a.key === "manager");
   const photosManager = action
     ?.flatMap((a) => a.photos || [])
     ?.find((a) => a.key === "manager")
@@ -505,22 +504,65 @@ const ReusableTable = ({ data }) => {
               action.label && currentRole.allowActions.includes(action.label)
           );
         }
+        // Filter actions based on the column's serial (supports single number or array)
+        if (col.serial !== undefined) {
+          filteredActions = filteredActions.filter((action) => {
+            if (action.serial !== undefined) {
+              if (Array.isArray(action.serial)) {
+                return action.serial.includes(col.serial);
+              }
+              return action.serial === col.serial;
+            }
+            // Optionally, exclude actions without a defined serial when a column serial is set
+            return false;
+          });
+        }
+
+        // Determine the configuration for the current actions column.
+        // Priority: "actionsColumn" with matching serial (or array of serials) > fallback to "actionsVariant".
+        const columnConfig = (() => {
+          let specificConfig = null;
+          if (col.serial !== undefined && actionsManager?.value) {
+            const actionColumnConfigs = actionsManager.value.filter(
+              (cfg) => cfg.id === "actionsColumn"
+            );
+            if (actionColumnConfigs && actionColumnConfigs.length > 0) {
+              specificConfig = actionColumnConfigs.find((cfg) => {
+                if (cfg.serial !== undefined) {
+                  if (Array.isArray(cfg.serial)) {
+                    return cfg.serial.includes(col.serial);
+                  }
+                  return cfg.serial === col.serial;
+                }
+                return false;
+              });
+            }
+          }
+          return (
+            specificConfig ||
+            actionsManager?.value?.find((cfg) => cfg.id === "actionsVariant") ||
+            {}
+          );
+        })();
+
         return (
           <div
             className={`grid ${
-              actionsManager?.dataPosition || "items-center justify-center"
+              columnConfig?.dataPosition || "items-center justify-center"
             } ${
-              actionsManager?.actionsFlexType === "horizontal"
+              columnConfig?.actionsFlexType === "horizontal"
                 ? "grid-flow-col"
                 : "grid-flow-row"
             }`}
             style={{
-              gap: `${actionsManager?.actionsBetween || 8}px`,
-              ...(actionsManager?.actionsFlexType === "horizontal"
+              gap:
+                filteredActions?.length > 1 &&
+                `${columnConfig?.actionsBetween || 8}px`,
+              ...(columnConfig?.actionsFlexType === "horizontal"
                 ? { gridTemplateRows: "repeat(1, auto)" }
                 : {
                     gridTemplateColumns: `repeat(${
-                      Number(actionsManager?.verticalColumns) || 2
+                      Number(columnConfig?.verticalColumns) || 2
                     }, auto)`,
                   }),
             }}
@@ -571,6 +613,7 @@ const ReusableTable = ({ data }) => {
           </div>
         );
       }
+
       return "";
     } else {
       let value = getNestedValue(row, col.key);
