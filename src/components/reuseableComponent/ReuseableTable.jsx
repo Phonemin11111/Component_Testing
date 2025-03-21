@@ -376,7 +376,7 @@ const ReusableTable = ({ data }) => {
         );
       } else if (col.action === "badges") {
         const badgesManager = action?.flatMap((a) => a.badges || []);
-        if (badgesManager?.length) {
+        if (col.action === "badges") {
           const status = row.status; // e.g. "Alive", "Dead", or "unknown"
           // Find the badge that defines the current status
           const badgeForStatus = badgesManager.find((badge) => badge[status]);

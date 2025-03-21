@@ -1,5 +1,6 @@
 import DashboardLayout from "../components/dashboard/DashboardLayout";
 import TestOne from "../components/test/TestOne";
+import TestThree from "../components/test/TestThree";
 import TestTwo from "../components/test/TestTwo";
 import Calculator from "../pages/dashboard/Calculator";
 import Home from "../pages/dashboard/Home";
@@ -56,6 +57,10 @@ const dashboardRoute = [
       {
         path: "/cms-admin/calculator",
         element: <Calculator />,
+      },
+      {
+        path: "/cms-admin/testThree",
+        element: <TestThree />,
       },
     ],
   },
