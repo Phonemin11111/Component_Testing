@@ -192,6 +192,10 @@ const ReusableTable = ({ data }) => {
     ?.flatMap((a) => a.photos || [])
     ?.find((a) => a.key === "manager")
     ?.value?.find((item) => item.id === "photosVariant");
+  const linksManager = action
+    ?.flatMap((a) => a.links || [])
+    ?.find((a) => a.key === "manager")
+    ?.value?.find((item) => item.id === "linksVariant");
   const footersManager = getSectionManager(footers, "footerVariant");
 
   const headerCellManagers = columns
@@ -340,7 +344,7 @@ const ReusableTable = ({ data }) => {
   // ------------
   // RENDERING HELPERS
   // ------------
-  const renderHeaderCellContent = (cell, col, headerRowIndex) => {
+  const renderHeaderCellContent = (cell, col) => {
     if (col.action === "checkMarks") {
       if (!currentRole.allowCheckbox) return "";
       return (
@@ -479,18 +483,20 @@ const ReusableTable = ({ data }) => {
         const linkUrl = getNestedValue(row, col.key);
         if (linkUrl) {
           return (
-            <button className="w-[54px] text-cyan-500 hover:text-cyan-700 ">
+            <button className={`w-[54px] text-cyan-500 hover:text-cyan-700`}>
               <a
                 title={linkUrl}
                 href={linkUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-nowrap flex flex-row items-center justify-center gap-[2px] hover:gap-[4px] group transition-all duration-200 ease-out hover:scale-110"
+                className={`text-nowrap flex flex-row items-center justify-center gap-[2px] hover:gap-[4px] group transition-all duration-100 ease-out hover:scale-110`}
               >
-                <span className="relative z-10 underline group-hover:underline-offset-3 decoration-1 underline-offset-1 font-light transition-all duration-200 ease-out">
+                <span
+                  className={`relative z-10 underline group-hover:underline-offset-3 decoration-1 underline-offset-1 font-light transition-all duration-100 ease-out`}
+                >
                   Visit
                 </span>
-                <span className="relative z-10 text-[16px]">⮺</span>
+                <span className={`relative z-10 text-[16px]`}>⮺</span>
               </a>
             </button>
           );
@@ -643,463 +649,560 @@ const ReusableTable = ({ data }) => {
     </caption>
   );
 
-  const renderHeader = () => (
-    <thead className={columnsManager?.dataColor || "bg-cyan-100"}>
-      {headerRows.map((row, headerRowIndex) => (
-        <tr key={`header-${headerRowIndex}`}>
-          {baseColumns.map((col, colIndex) => {
-            if (!isColumnAllowed(col)) return null;
-            const cell = row.find((c) => c.key === col.key) || {};
-            const mergeResult = getMergeAttributes(
-              headerRowIndex,
-              colIndex,
-              "header"
-            );
-            if (mergeResult === null) return null;
-            let content = renderHeaderCellContent(cell, col, headerRowIndex);
-            if (
-              mergeResult.mergeItem &&
-              Array.isArray(mergeResult.mergeItem.showData)
-            ) {
-              content = getCombinedContent(
-                null,
-                mergeResult.mergeItem,
-                true,
-                false
-              );
-            }
-            const lastSpannedColumn =
-              colIndex + (mergeResult.props?.colSpan || 1) - 1;
-            // Check if this is the last cell (either naturally or due to merging)
-            const isLastCell = lastSpannedColumn === baseColumns.length - 1;
-            //fakeMerge function
-            const getCoordinationCondition = (coordValue, index) => {
-              // If undefined, return true (no condition applied)
-              if (coordValue === undefined) return true;
-              // If it's an array, return true if any item in the array matches the index.
-              if (Array.isArray(coordValue)) {
-                return coordValue.some((item) =>
-                  getCoordinationCondition(item, index)
-                );
-              }
-              // If it's an object with 'from' and 'to' properties, check the range.
-              if (
-                typeof coordValue === "object" &&
-                coordValue !== null &&
-                "from" in coordValue &&
-                "to" in coordValue
-              ) {
-                return index >= coordValue.from && index <= coordValue.to;
-              }
-              // Otherwise, assume it's a number.
-              return coordValue === index;
-            };
-            // Filter managers based on the coordination conditions for both x and y.
-            // This now handles numbers, range objects, or arrays containing either.
-            const matchingHeaderCellManagers = headerCellManagers?.filter(
-              (manager) => {
-                const xCondition = getCoordinationCondition(
-                  manager?.coordination?.x,
-                  colIndex
-                );
-                const yCondition = getCoordinationCondition(
-                  manager?.coordination?.y,
-                  headerRowIndex
-                );
-                return xCondition && yCondition;
-              }
-            );
-            // Combine the classes for dataVariant (for one parent)
-            const combinedHeaderVariant = matchingHeaderCellManagers
-              ?.map((manager) => manager.dataVariant)
-              .join(" ");
-            // Combine the classes for dataPosition (for another parent)
-            const combinedHeaderPosition = matchingHeaderCellManagers
-              ?.map((manager) => manager.dataPosition)
-              .join(" ");
-            return (
-              <th
-                key={colIndex}
-                {...mergeResult.props}
-                style={
-                  tableManager?.dataRadius != undefined
-                    ? {
-                        borderTopLeftRadius:
-                          headerRowIndex === 0 && colIndex === 0
-                            ? `${
-                                tableManager?.dataRadius?.tl
-                                  ? tableManager?.dataRadius?.tl
-                                  : tableManager?.dataRadius?.t
-                                  ? tableManager?.dataRadius?.t
-                                  : tableManager?.dataRadius || 0
-                              }px`
-                            : undefined,
-                        borderTopRightRadius:
-                          headerRowIndex === 0 &&
-                          (colIndex === baseColumns.length - 1 || isLastCell)
-                            ? `${
-                                tableManager?.dataRadius?.tr
-                                  ? tableManager?.dataRadius?.tr
-                                  : tableManager?.dataRadius?.t
-                                  ? tableManager?.dataRadius?.t
-                                  : tableManager?.dataRadius || 0
-                              }px`
-                            : undefined,
-                      }
-                    : undefined
-                }
-                className={`${
-                  columnsManager?.dataVariant ||
-                  "px-4 py-2 text-left text-sm font-medium text-gray-700 border-cyan-300"
-                } ${
-                  (typeof tableManager?.dataSpacing !== "object" &&
-                    tableManager?.dataSpacing !== undefined &&
-                    tableManager?.dataSpacing > 0) ||
-                  (tableManager?.dataSpacing?.x > 0 &&
-                    tableManager?.dataSpacing?.y > 0)
-                    ? "border"
-                    : `${
-                        tableManager?.dataSpacing?.x > 0
-                          ? "border-l"
-                          : colIndex === 0
-                          ? "border-l"
-                          : ""
-                      } ${
-                        tableManager?.dataSpacing?.y > 0
-                          ? "border-t"
-                          : headerRowIndex === 0
-                          ? "border-t"
-                          : ""
-                      } border-b border-r`
-                } ${combinedHeaderVariant}`}
-              >
-                <span
-                  className={`flex flex-row ${
-                    columnsManager?.dataPosition ||
-                    "items-center justify-center gap-1"
-                  } ${combinedHeaderPosition}`}
-                >
-                  {cell.icon && <span>{cell.icon}</span>}
-                  {content}
-                </span>
-              </th>
-            );
-          })}
-        </tr>
-      ))}
-    </thead>
-  );
+  const renderHeader = () => {
+    // Calculate the total number of columns and rows for header
+    const totalColCount = baseColumns.length;
+    const totalRowCount = headerRows.length;
 
-  const renderBody = () => (
-    <tbody>
-      {tableRows.map((row, rowIndex) => (
-        <tr
-          key={rowIndex}
-          className={`${bodyManager?.dataColor || "hover:bg-cyan-50 bg-white"}`}
-        >
-          {baseColumns.map((col, colIndex) => {
-            if (!isColumnAllowed(col)) return null;
-            const mergeResult = getMergeAttributes(rowIndex, colIndex, "body");
-            if (mergeResult === null) return null;
-            let content = renderBodyCellContent(row, rowIndex, col);
-            if (
-              mergeResult.mergeItem &&
-              Array.isArray(mergeResult.mergeItem.showData)
-            ) {
-              content = getCombinedContent(
-                row,
-                mergeResult.mergeItem,
-                false,
-                false
-              );
-            }
-            const lastSpannedColumn =
-              colIndex + (mergeResult.props?.colSpan || 1) - 1;
-            // Check if this is the last cell (either naturally or due to merging)
-            const isLastCell = lastSpannedColumn === baseColumns.length - 1;
-            //fakeMerge function
-            const getCoordinationCondition = (coordValue, index) => {
-              // If undefined, return true (no condition applied)
-              if (coordValue === undefined) return true;
-              // If it's an array, return true if any item in the array matches the index.
-              if (Array.isArray(coordValue)) {
-                return coordValue.some((item) =>
-                  getCoordinationCondition(item, index)
-                );
-              }
-              // If it's an object with 'from' and 'to' properties, check the range.
-              if (
-                typeof coordValue === "object" &&
-                coordValue !== null &&
-                "from" in coordValue &&
-                "to" in coordValue
-              ) {
-                return index >= coordValue.from && index <= coordValue.to;
-              }
-              // Otherwise, assume it's a number.
-              return coordValue === index;
-            };
-            // Filter managers based on the coordination conditions for both x and y.
-            // This now handles numbers, range objects, or arrays containing either.
-            const matchingBodyCellManagers = bodyCellManagers?.filter(
-              (manager) => {
-                const xCondition = getCoordinationCondition(
-                  manager?.coordination?.x,
-                  colIndex
-                );
-                const yCondition = getCoordinationCondition(
-                  manager?.coordination?.y,
-                  rowIndex
-                );
-                return xCondition && yCondition;
-              }
-            );
-            // Combine the classes for dataVariant (for one parent)
-            const combinedDataVariant = matchingBodyCellManagers
-              ?.map((manager) => manager.dataVariant)
-              .join(" ");
-            // Combine the classes for dataPosition (for another parent)
-            const combinedDataPosition = matchingBodyCellManagers
-              ?.map((manager) => manager.dataPosition)
-              .join(" ");
-            return (
-              <td
-                key={colIndex}
-                {...mergeResult.props}
-                style={
-                  tableManager?.dataRadius != undefined
-                    ? {
-                        borderBottomLeftRadius:
-                          footersDataRaw?.length === 0 &&
-                          rowIndex === tableRows.length - 1 &&
-                          colIndex === 0
-                            ? `${
-                                tableManager?.dataRadius?.bl
-                                  ? tableManager?.dataRadius?.bl
-                                  : tableManager?.dataRadius?.b
-                                  ? tableManager?.dataRadius?.b
-                                  : tableManager?.dataRadius || 0
-                              }px`
-                            : undefined,
-                        borderBottomRightRadius:
-                          footersDataRaw?.length === 0 &&
-                          rowIndex === tableRows.length - 1 &&
-                          (colIndex === baseColumns.length - 1 || isLastCell)
-                            ? `${
-                                tableManager?.dataRadius?.br
-                                  ? tableManager?.dataRadius?.br
-                                  : tableManager?.dataRadius?.b
-                                  ? tableManager?.dataRadius?.b
-                                  : tableManager?.dataRadius || 0
-                              }px`
-                            : undefined,
-                      }
-                    : undefined
-                }
-                className={`${
-                  bodyManager?.dataVariant ||
-                  "px-4 py-2 text-sm text-gray-600 border-cyan-300"
-                } ${
-                  (typeof tableManager?.dataSpacing !== "object" &&
-                    tableManager?.dataSpacing !== undefined &&
-                    tableManager?.dataSpacing > 0) ||
-                  (tableManager?.dataSpacing?.x > 0 &&
-                    tableManager?.dataSpacing?.y > 0)
-                    ? "border"
-                    : `border-b border-r ${
-                        tableManager?.dataSpacing?.y > 0 ? "border-t" : ""
-                      } ${
-                        tableManager?.dataSpacing?.x > 0
-                          ? "border-l"
-                          : "first:border-l"
-                      }`
-                } ${combinedDataVariant}`}
-              >
-                <span
-                  className={`flex flex-row ${
-                    bodyManager?.dataPosition || "items-center justify-center"
-                  } ${combinedDataPosition}`}
-                >
-                  {content}
-                </span>
-              </td>
-            );
-          })}
-        </tr>
-      ))}
-    </tbody>
-  );
+    // Helper function to check coordination
+    const getCoordinationCondition = (coordValue, index, totalCount) => {
+      // If undefined, return true (no condition applied)
+      if (coordValue === undefined) return true;
 
-  const renderFooter = () => (
-    <tfoot>
-      {processedFooterRows.map((row, footerRowIndex) => (
-        <tr
-          key={`footer-${footerRowIndex}`}
-          className={`${footersManager?.dataColor || "bg-cyan-50"}`}
-        >
-          {baseColumns.map((col, colIndex) => {
-            if (!isColumnAllowed(col)) return null;
-            const mergeResult = getMergeAttributes(
-              footerRowIndex,
-              colIndex,
-              "footer"
-            );
-            if (mergeResult === null) return null;
-            const cell =
-              row.find((c) => {
-                if (typeof c.col === "number") return c.col === colIndex;
-                return c.col === col.key;
-              }) || {};
-            let content = cell.footer || "";
-            if (
-              mergeResult.mergeItem &&
-              Array.isArray(mergeResult.mergeItem.showData)
-            ) {
-              content = getCombinedContent(
-                null,
-                mergeResult.mergeItem,
-                false,
-                true
+      // If it's an array, return true if any item in the array matches the index.
+      if (Array.isArray(coordValue)) {
+        return coordValue.some((item) =>
+          getCoordinationCondition(item, index, totalCount)
+        );
+      }
+
+      // If it's an object with 'from' and 'to' properties, check the range.
+      if (
+        typeof coordValue === "object" &&
+        coordValue !== null &&
+        "from" in coordValue &&
+        "to" in coordValue
+      ) {
+        const { from, to } = coordValue;
+        // If from is "strCell", use 0; otherwise, use the numeric value.
+        const startVal = from === "strCell" ? 0 : from;
+        // If to is "edCell", use totalCount - 1; otherwise, use the numeric value.
+        const endVal = to === "edCell" ? totalCount - 1 : to;
+        return index >= startVal && index <= endVal;
+      }
+
+      // If it's a string value
+      if (typeof coordValue === "string") {
+        if (coordValue === "strCell") {
+          return index === 0;
+        }
+        if (coordValue === "edCell") {
+          return index === totalCount - 1;
+        }
+        return parseInt(coordValue, 10) === index;
+      }
+
+      // Otherwise, assume it's a number.
+      return coordValue === index;
+    };
+
+    return (
+      <thead className={columnsManager?.dataColor || "bg-cyan-100"}>
+        {headerRows.map((row, headerRowIndex) => (
+          <tr key={`header-${headerRowIndex}`}>
+            {baseColumns.map((col, colIndex) => {
+              if (!isColumnAllowed(col)) return null;
+              const cell = row.find((c) => c.key === col.key) || {};
+              const mergeResult = getMergeAttributes(
+                headerRowIndex,
+                colIndex,
+                "header"
               );
-            }
-            const groupKey =
-              cell.sumChecked !== undefined ? cell.sumChecked : cell.key;
-            if (groupKey && sumConfigs[groupKey]) {
-              content =
-                cell.sumChecked !== undefined ? (
-                  computedSums[groupKey] !== undefined ? (
-                    computedSums[groupKey]
-                  ) : (
-                    0
-                  )
-                ) : (
-                  <button
-                    className="hover:opacity-75"
-                    onClick={() => handleSumClick(groupKey)}
-                    style={{ cursor: "pointer" }}
+              if (mergeResult === null) return null;
+              let content = renderHeaderCellContent(cell, col, headerRowIndex);
+              if (
+                mergeResult.mergeItem &&
+                Array.isArray(mergeResult.mergeItem.showData)
+              ) {
+                content = getCombinedContent(
+                  null,
+                  mergeResult.mergeItem,
+                  true,
+                  false
+                );
+              }
+              const lastSpannedColumn =
+                colIndex + (mergeResult.props?.colSpan || 1) - 1;
+              // Check if this is the last cell (either naturally or due to merging)
+              const isLastCell = lastSpannedColumn === totalColCount - 1;
+
+              // Filter managers based on coordination conditions for both x and y.
+              // Note: x corresponds to the column and y to the row.
+              const matchingHeaderCellManagers = headerCellManagers?.filter(
+                (manager) => {
+                  const xCondition = getCoordinationCondition(
+                    manager?.coordination?.x,
+                    colIndex,
+                    totalColCount
+                  );
+                  const yCondition = getCoordinationCondition(
+                    manager?.coordination?.y,
+                    headerRowIndex,
+                    totalRowCount
+                  );
+                  return xCondition && yCondition;
+                }
+              );
+
+              // Combine the classes for dataVariant (for one parent)
+              const combinedHeaderVariant = matchingHeaderCellManagers
+                ?.map((manager) => manager.dataVariant)
+                .join(" ");
+              // Combine the classes for dataPosition (for another parent)
+              const combinedHeaderPosition = matchingHeaderCellManagers
+                ?.map((manager) => manager.dataPosition)
+                .join(" ");
+
+              return (
+                <th
+                  key={colIndex}
+                  {...mergeResult.props}
+                  style={
+                    tableManager?.dataRadius != undefined
+                      ? {
+                          borderTopLeftRadius:
+                            headerRowIndex === 0 && colIndex === 0
+                              ? `${
+                                  tableManager?.dataRadius?.tl
+                                    ? tableManager?.dataRadius?.tl
+                                    : tableManager?.dataRadius?.t
+                                    ? tableManager?.dataRadius?.t
+                                    : tableManager?.dataRadius || 0
+                                }px`
+                              : undefined,
+                          borderTopRightRadius:
+                            headerRowIndex === 0 &&
+                            (colIndex === totalColCount - 1 || isLastCell)
+                              ? `${
+                                  tableManager?.dataRadius?.tr
+                                    ? tableManager?.dataRadius?.tr
+                                    : tableManager?.dataRadius?.t
+                                    ? tableManager?.dataRadius?.t
+                                    : tableManager?.dataRadius || 0
+                                }px`
+                              : undefined,
+                        }
+                      : undefined
+                  }
+                  className={`${
+                    columnsManager?.dataVariant ||
+                    "px-4 py-2 text-left text-sm font-medium text-gray-700 border-cyan-300"
+                  } ${
+                    (typeof tableManager?.dataSpacing !== "object" &&
+                      tableManager?.dataSpacing !== undefined &&
+                      tableManager?.dataSpacing > 0) ||
+                    (tableManager?.dataSpacing?.x > 0 &&
+                      tableManager?.dataSpacing?.y > 0)
+                      ? "border"
+                      : `${
+                          tableManager?.dataSpacing?.x > 0
+                            ? "border-l"
+                            : colIndex === 0
+                            ? "border-l"
+                            : ""
+                        } ${
+                          tableManager?.dataSpacing?.y > 0
+                            ? "border-t"
+                            : headerRowIndex === 0
+                            ? "border-t"
+                            : ""
+                        } border-b border-r`
+                  } ${combinedHeaderVariant}`}
+                >
+                  <span
+                    className={`flex flex-row ${
+                      columnsManager?.dataPosition ||
+                      "items-center justify-center gap-1"
+                    } ${combinedHeaderPosition}`}
                   >
-                    {cell.footer === true ? "Click to Sum" : cell.footer}
-                  </button>
-                );
-            }
-            // Compute last spanned column index
-            const lastSpannedColumn =
-              colIndex + (mergeResult.props?.colSpan || 1) - 1;
-            // Check if this is the last cell (either naturally or due to merging)
-            const isLastCell = lastSpannedColumn === baseColumns.length - 1;
-            //fakeMerge function
-            const getCoordinationCondition = (coordValue, index) => {
-              // If undefined, return true (no condition applied)
-              if (coordValue === undefined) return true;
-              // If it's an array, return true if any item in the array matches the index.
-              if (Array.isArray(coordValue)) {
-                return coordValue.some((item) =>
-                  getCoordinationCondition(item, index)
-                );
-              }
-              // If it's an object with 'from' and 'to' properties, check the range.
+                    {cell.icon && <span>{cell.icon}</span>}
+                    {content}
+                  </span>
+                </th>
+              );
+            })}
+          </tr>
+        ))}
+      </thead>
+    );
+  };
+
+  const renderBody = () => {
+    // Total counts for rows and columns
+    const totalRowCount = tableRows.length;
+    const totalColCount = baseColumns.length;
+
+    // Helper function to evaluate the coordination condition
+    const getCoordinationCondition = (coordValue, index, totalCount) => {
+      // If undefined, no condition is applied.
+      if (coordValue === undefined) return true;
+
+      // If it's an array, check if any item passes the condition.
+      if (Array.isArray(coordValue)) {
+        return coordValue.some((item) =>
+          getCoordinationCondition(item, index, totalCount)
+        );
+      }
+
+      // If it's an object with 'from' and 'to' properties, check the range.
+      if (
+        typeof coordValue === "object" &&
+        coordValue !== null &&
+        "from" in coordValue &&
+        "to" in coordValue
+      ) {
+        const { from, to } = coordValue;
+        // If from is "strCell", use 0; otherwise, use the provided value.
+        const startVal = from === "strCell" ? 0 : from;
+        // If to is "edCell", use totalCount - 1; otherwise, use the provided value.
+        const endVal = to === "edCell" ? totalCount - 1 : to;
+        return index >= startVal && index <= endVal;
+      }
+
+      // If it's a string, check for special keywords or convert to a number.
+      if (typeof coordValue === "string") {
+        if (coordValue === "strCell") {
+          return index === 0;
+        }
+        if (coordValue === "edCell") {
+          return index === totalCount - 1;
+        }
+        return parseInt(coordValue, 10) === index;
+      }
+
+      // Otherwise, assume it's a number and do a direct comparison.
+      return coordValue === index;
+    };
+
+    return (
+      <tbody>
+        {tableRows.map((row, rowIndex) => (
+          <tr
+            key={rowIndex}
+            className={`${
+              bodyManager?.dataColor || "hover:bg-cyan-50 bg-white"
+            }`}
+          >
+            {baseColumns.map((col, colIndex) => {
+              if (!isColumnAllowed(col)) return null;
+              const mergeResult = getMergeAttributes(
+                rowIndex,
+                colIndex,
+                "body"
+              );
+              if (mergeResult === null) return null;
+              let content = renderBodyCellContent(row, rowIndex, col);
               if (
-                typeof coordValue === "object" &&
-                coordValue !== null &&
-                "from" in coordValue &&
-                "to" in coordValue
+                mergeResult.mergeItem &&
+                Array.isArray(mergeResult.mergeItem.showData)
               ) {
-                return index >= coordValue.from && index <= coordValue.to;
-              }
-              // Otherwise, assume it's a number.
-              return coordValue === index;
-            };
-            // Filter managers based on the coordination conditions for both x and y.
-            // This now handles numbers, range objects, or arrays containing either.
-            const matchingFooterCellManagers = footerCellManagers?.filter(
-              (manager) => {
-                const xCondition = getCoordinationCondition(
-                  manager?.coordination?.x,
-                  colIndex
+                content = getCombinedContent(
+                  row,
+                  mergeResult.mergeItem,
+                  false,
+                  false
                 );
-                const yCondition = getCoordinationCondition(
-                  manager?.coordination?.y,
-                  footerRowIndex
-                );
-                return xCondition && yCondition;
               }
-            );
-            // Combine the class names for dataVariant (to be used in one parent element)
-            const combinedFooterVariant = matchingFooterCellManagers
-              ?.map((manager) => manager.dataVariant)
-              .join(" ");
-            // Combine the class names for dataPosition (to be used in another parent element)
-            const combinedFooterPosition = matchingFooterCellManagers
-              ?.map((manager) => manager.dataPosition)
-              .join(" ");
-            return (
-              <td
-                key={colIndex}
-                {...mergeResult.props}
-                style={
-                  tableManager?.dataRadius != undefined
-                    ? {
-                        borderBottomLeftRadius:
-                          footersDataRaw?.length > 0 &&
-                          footerRowIndex === processedFooterRows.length - 1 &&
-                          colIndex === 0
-                            ? `${
-                                tableManager?.dataRadius?.bl
-                                  ? tableManager?.dataRadius?.bl
-                                  : tableManager?.dataRadius?.b
-                                  ? tableManager?.dataRadius?.b
-                                  : tableManager?.dataRadius || 0
-                              }px`
-                            : undefined,
-                        borderBottomRightRadius:
-                          footersDataRaw?.length > 0 &&
-                          footerRowIndex === processedFooterRows.length - 1 &&
-                          (colIndex === baseColumns.length - 1 || isLastCell)
-                            ? `${
-                                tableManager?.dataRadius?.br
-                                  ? tableManager?.dataRadius?.br
-                                  : tableManager?.dataRadius?.b
-                                  ? tableManager?.dataRadius?.b
-                                  : tableManager?.dataRadius || 0
-                              }px`
-                            : undefined,
-                      }
-                    : undefined
+              const lastSpannedColumn =
+                colIndex + (mergeResult.props?.colSpan || 1) - 1;
+              const isLastCell = lastSpannedColumn === totalColCount - 1;
+
+              // For body cells:
+              // - x coordination is checked against the column index.
+              // - y coordination is checked against the row index.
+              const matchingBodyCellManagers = bodyCellManagers?.filter(
+                (manager) => {
+                  const xCondition = getCoordinationCondition(
+                    manager?.coordination?.x,
+                    colIndex,
+                    totalColCount
+                  );
+                  const yCondition = getCoordinationCondition(
+                    manager?.coordination?.y,
+                    rowIndex,
+                    totalRowCount
+                  );
+                  return xCondition && yCondition;
                 }
-                className={`${
-                  footersManager?.dataVariant ||
-                  "px-4 py-2 text-left text-sm font-medium text-gray-700 border-cyan-300"
-                } ${
-                  (typeof tableManager?.dataSpacing !== "object" &&
-                    tableManager?.dataSpacing !== undefined &&
-                    tableManager?.dataSpacing > 0) ||
-                  (tableManager?.dataSpacing?.x > 0 &&
-                    tableManager?.dataSpacing?.y > 0)
-                    ? "border"
-                    : `border-b border-r ${
-                        tableManager?.dataSpacing?.y > 0 ? "border-t" : ""
-                      } ${
-                        tableManager?.dataSpacing?.x > 0
-                          ? "border-l"
-                          : "first:border-l"
-                      }`
-                } ${combinedFooterVariant}`}
-              >
-                <span
-                  className={`flex flex-row ${
-                    footersManager?.dataPosition ||
-                    "items-center justify-center"
-                  } ${combinedFooterPosition}`}
+              );
+
+              // Combine the class names for dataVariant and dataPosition.
+              const combinedDataVariant = matchingBodyCellManagers
+                ?.map((manager) => manager.dataVariant)
+                .join(" ");
+              const combinedDataPosition = matchingBodyCellManagers
+                ?.map((manager) => manager.dataPosition)
+                .join(" ");
+
+              return (
+                <td
+                  key={colIndex}
+                  {...mergeResult.props}
+                  style={
+                    tableManager?.dataRadius != undefined
+                      ? {
+                          borderBottomLeftRadius:
+                            footersDataRaw?.length === 0 &&
+                            rowIndex === tableRows.length - 1 &&
+                            colIndex === 0
+                              ? `${
+                                  tableManager?.dataRadius?.bl
+                                    ? tableManager?.dataRadius?.bl
+                                    : tableManager?.dataRadius?.b
+                                    ? tableManager?.dataRadius?.b
+                                    : tableManager?.dataRadius || 0
+                                }px`
+                              : undefined,
+                          borderBottomRightRadius:
+                            footersDataRaw?.length === 0 &&
+                            rowIndex === tableRows.length - 1 &&
+                            (colIndex === totalColCount - 1 || isLastCell)
+                              ? `${
+                                  tableManager?.dataRadius?.br
+                                    ? tableManager?.dataRadius?.br
+                                    : tableManager?.dataRadius?.b
+                                    ? tableManager?.dataRadius?.b
+                                    : tableManager?.dataRadius || 0
+                                }px`
+                              : undefined,
+                        }
+                      : undefined
+                  }
+                  className={`${
+                    bodyManager?.dataVariant ||
+                    "px-4 py-2 text-sm text-gray-600 border-cyan-300"
+                  } ${
+                    (typeof tableManager?.dataSpacing !== "object" &&
+                      tableManager?.dataSpacing !== undefined &&
+                      tableManager?.dataSpacing > 0) ||
+                    (tableManager?.dataSpacing?.x > 0 &&
+                      tableManager?.dataSpacing?.y > 0)
+                      ? "border"
+                      : `border-b border-r ${
+                          tableManager?.dataSpacing?.y > 0 ? "border-t" : ""
+                        } ${
+                          tableManager?.dataSpacing?.x > 0
+                            ? "border-l"
+                            : "first:border-l"
+                        }`
+                  } ${combinedDataVariant}`}
                 >
-                  {content}
-                </span>
-              </td>
-            );
-          })}
-        </tr>
-      ))}
-    </tfoot>
-  );
+                  <span
+                    className={`flex flex-row ${
+                      bodyManager?.dataPosition || "items-center justify-center"
+                    } ${combinedDataPosition}`}
+                  >
+                    {content}
+                  </span>
+                </td>
+              );
+            })}
+          </tr>
+        ))}
+      </tbody>
+    );
+  };
+
+  const renderFooter = () => {
+    // Total counts for columns and footer rows
+    const totalColCount = baseColumns.length;
+    const totalRowCount = processedFooterRows.length;
+
+    // Helper function to evaluate the coordination condition.
+    const getCoordinationCondition = (coordValue, index, totalCount) => {
+      // If undefined, no condition is applied.
+      if (coordValue === undefined) return true;
+
+      // If it's an array, return true if any item passes the check.
+      if (Array.isArray(coordValue)) {
+        return coordValue.some((item) =>
+          getCoordinationCondition(item, index, totalCount)
+        );
+      }
+
+      // If it's an object with 'from' and 'to' properties, check the range.
+      if (
+        typeof coordValue === "object" &&
+        coordValue !== null &&
+        "from" in coordValue &&
+        "to" in coordValue
+      ) {
+        const { from, to } = coordValue;
+        // If from is "strCell", use 0; otherwise, use the provided value.
+        const startVal = from === "strCell" ? 0 : from;
+        // If to is "edCell", use totalCount - 1; otherwise, use the provided value.
+        const endVal = to === "edCell" ? totalCount - 1 : to;
+        return index >= startVal && index <= endVal;
+      }
+
+      // If it's a string, check for special keywords.
+      if (typeof coordValue === "string") {
+        if (coordValue === "strCell") {
+          return index === 0;
+        }
+        if (coordValue === "edCell") {
+          return index === totalCount - 1;
+        }
+        return parseInt(coordValue, 10) === index;
+      }
+
+      // Otherwise, assume it's a number.
+      return coordValue === index;
+    };
+
+    return (
+      <tfoot>
+        {processedFooterRows.map((row, footerRowIndex) => (
+          <tr
+            key={`footer-${footerRowIndex}`}
+            className={`${footersManager?.dataColor || "bg-cyan-50"}`}
+          >
+            {baseColumns.map((col, colIndex) => {
+              if (!isColumnAllowed(col)) return null;
+              const mergeResult = getMergeAttributes(
+                footerRowIndex,
+                colIndex,
+                "footer"
+              );
+              if (mergeResult === null) return null;
+              const cell =
+                row.find((c) => {
+                  if (typeof c.col === "number") return c.col === colIndex;
+                  return c.col === col.key;
+                }) || {};
+              let content = cell.footer || "";
+              if (
+                mergeResult.mergeItem &&
+                Array.isArray(mergeResult.mergeItem.showData)
+              ) {
+                content = getCombinedContent(
+                  null,
+                  mergeResult.mergeItem,
+                  false,
+                  true
+                );
+              }
+              const groupKey =
+                cell.sumChecked !== undefined ? cell.sumChecked : cell.key;
+              if (groupKey && sumConfigs[groupKey]) {
+                content =
+                  cell.sumChecked !== undefined ? (
+                    computedSums[groupKey] !== undefined ? (
+                      computedSums[groupKey]
+                    ) : (
+                      0
+                    )
+                  ) : (
+                    <button
+                      className="hover:opacity-75"
+                      onClick={() => handleSumClick(groupKey)}
+                      style={{ cursor: "pointer" }}
+                    >
+                      {cell.footer === true ? "Click to Sum" : cell.footer}
+                    </button>
+                  );
+              }
+              // Compute last spanned column index
+              const lastSpannedColumn =
+                colIndex + (mergeResult.props?.colSpan || 1) - 1;
+              // Check if this is the last cell (either naturally or due to merging)
+              const isLastCell = lastSpannedColumn === totalColCount - 1;
+
+              // Filter managers based on coordination conditions.
+              // For footer cells, assume x-coordinate corresponds to the column index
+              // and y-coordinate corresponds to the footer row index.
+              const matchingFooterCellManagers = footerCellManagers?.filter(
+                (manager) => {
+                  const xCondition = getCoordinationCondition(
+                    manager?.coordination?.x,
+                    colIndex,
+                    totalColCount
+                  );
+                  const yCondition = getCoordinationCondition(
+                    manager?.coordination?.y,
+                    footerRowIndex,
+                    totalRowCount
+                  );
+                  return xCondition && yCondition;
+                }
+              );
+              // Combine the classes for dataVariant and dataPosition.
+              const combinedFooterVariant = matchingFooterCellManagers
+                ?.map((manager) => manager.dataVariant)
+                .join(" ");
+              const combinedFooterPosition = matchingFooterCellManagers
+                ?.map((manager) => manager.dataPosition)
+                .join(" ");
+
+              return (
+                <td
+                  key={colIndex}
+                  {...mergeResult.props}
+                  style={
+                    tableManager?.dataRadius !== undefined
+                      ? {
+                          borderBottomLeftRadius:
+                            footersDataRaw?.length > 0 &&
+                            footerRowIndex === processedFooterRows.length - 1 &&
+                            colIndex === 0
+                              ? `${
+                                  tableManager?.dataRadius?.bl
+                                    ? tableManager?.dataRadius?.bl
+                                    : tableManager?.dataRadius?.b
+                                    ? tableManager?.dataRadius?.b
+                                    : tableManager?.dataRadius || 0
+                                }px`
+                              : undefined,
+                          borderBottomRightRadius:
+                            footersDataRaw?.length > 0 &&
+                            footerRowIndex === processedFooterRows.length - 1 &&
+                            (colIndex === totalColCount - 1 || isLastCell)
+                              ? `${
+                                  tableManager?.dataRadius?.br
+                                    ? tableManager?.dataRadius?.br
+                                    : tableManager?.dataRadius?.b
+                                    ? tableManager?.dataRadius?.b
+                                    : tableManager?.dataRadius || 0
+                                }px`
+                              : undefined,
+                        }
+                      : undefined
+                  }
+                  className={`${
+                    footersManager?.dataVariant ||
+                    "px-4 py-2 text-left text-sm font-medium text-gray-700 border-cyan-300"
+                  } ${
+                    (typeof tableManager?.dataSpacing !== "object" &&
+                      tableManager?.dataSpacing !== undefined &&
+                      tableManager?.dataSpacing > 0) ||
+                    (tableManager?.dataSpacing?.x > 0 &&
+                      tableManager?.dataSpacing?.y > 0)
+                      ? "border"
+                      : `border-b border-r ${
+                          tableManager?.dataSpacing?.y > 0 ? "border-t" : ""
+                        } ${
+                          tableManager?.dataSpacing?.x > 0
+                            ? "border-l"
+                            : "first:border-l"
+                        }`
+                  } ${combinedFooterVariant}`}
+                >
+                  <span
+                    className={`flex flex-row ${
+                      footersManager?.dataPosition ||
+                      "items-center justify-center"
+                    } ${combinedFooterPosition}`}
+                  >
+                    {content}
+                  </span>
+                </td>
+              );
+            })}
+          </tr>
+        ))}
+      </tfoot>
+    );
+  };
 
   return (
     <div className="overflow-auto w-full custom-scrollbar">

@@ -9,6 +9,7 @@ const TablePageFour = () => {
     ...item,
     created: item?.created ? new Date(item.created).toLocaleString() : null,
   }));
+  const linkData = data?.results?.map((item) => item?.location?.name);
 
   const columns = [
     {
@@ -16,10 +17,16 @@ const TablePageFour = () => {
       value: [
         {
           id: "columnsVariant",
+          dataColor: "bg-yellow-100",
           dataVariant:
-            "bg-red-100 px-3 py-1 text-sm font-medium text-red-900 border-red-300",
+            "px-3 py-1 text-sm font-medium text-red-900 border-red-300",
           dataPosition: "item-center justify-center gap-1",
         },
+        // {
+        //   id: "headerCell",
+        //   coordination: { x: 10, y: { from: "strCell", to: "edCell" } },
+        //   dataVariant: "bg-amber-500",
+        // },
       ],
     },
     {
@@ -60,8 +67,13 @@ const TablePageFour = () => {
           id: "bodyVariant",
           dataColor: "bg-yellow-100 hover:bg-yellow-50",
           dataVariant:
-            "px-2 py-2 text-sm font-medium text-yellow-900 border-yellow-300 text-nowrap",
+            "px-2 py-2 text-sm font-medium text-yellow-900 border-yellow-300",
           dataPosition: "item-center justify-center",
+        },
+        {
+          id: "bodyCell",
+          coordination: { x: { from: "strCell", to: "edCell" }, y: 13 },
+          dataVariant: "text-nowrap",
         },
       ],
     },
@@ -83,10 +95,16 @@ const TablePageFour = () => {
       value: [
         {
           id: "footerVariant",
+          dataColor: "bg-gray-100",
           dataVariant:
-            "bg-gray-100 px-2 py-2 text-sm font-medium text-gray-900 border-gray-300",
+            "px-2 py-2 text-sm font-medium text-gray-900 border-gray-300",
           dataPosition: "item-center justify-start",
         },
+        // {
+        //   id: "footerCell",
+        //   coordination: { x: 3, y: { from: "strCell", to: "edCell" } },
+        //   dataVariant: "bg-amber-500",
+        // },
       ],
     },
     {
@@ -138,6 +156,21 @@ const TablePageFour = () => {
             dataVariant: "bg-gray-500",
             dataTextVariant: "text-white",
           },
+        },
+      ],
+    },
+    {
+      links: [
+        {
+          key: "manager",
+          value: [
+            {
+              id: "linksVariant",
+              dataColor: "",
+              dataVariant: "",
+              dataInt: linkData,
+            },
+          ],
         },
       ],
     },

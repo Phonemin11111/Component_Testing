@@ -134,7 +134,7 @@ const TestOne = () => {
     //   value: [
     //     {
     //       id: "footerCell",
-    //       coordination: { x: [0, 1, { from: 3, to: 9 }], y: 0 },
+    //       coordination: { x: 0, y: [0, 1, { from: 3, to: 9 }] },
     //       dataVariant: "border-r-0",
     //     },
     //   ],

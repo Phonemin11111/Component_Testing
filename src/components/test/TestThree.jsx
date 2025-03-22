@@ -90,7 +90,7 @@ const TestThree = () => {
       value: [
         {
           id: "footerCell",
-          coordination: { x: [0, 1, { from: 3, to: 15 }], y: 0 },
+          coordination: { x: 0, y: [0, 1, { from: 3, to: 15 }] },
           dataVariant: "border-r-0",
         },
       ],
@@ -107,6 +107,21 @@ const TestThree = () => {
   ];
 
   const action = [
+    {
+      links: [
+        {
+          key: "manager",
+          value: [
+            {
+              id: "linksVariant",
+              dataColor: "",
+              dataVariant: "",
+              dataInt: "",
+            },
+          ],
+        },
+      ],
+    },
     {
       actions: [
         {
