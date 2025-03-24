@@ -188,14 +188,13 @@ const ReusableTable = ({ data }) => {
   const actionsManager = action
     ?.flatMap((a) => a.actions || [])
     ?.find((a) => a.key === "manager");
+  const linksManager = action
+    ?.flatMap((a) => a.links || [])
+    ?.find((a) => a.key === "manager");
   const photosManager = action
     ?.flatMap((a) => a.photos || [])
     ?.find((a) => a.key === "manager")
     ?.value?.find((item) => item.id === "photosVariant");
-  const linksManager = action
-    ?.flatMap((a) => a.links || [])
-    ?.find((a) => a.key === "manager")
-    ?.value?.find((item) => item.id === "linksVariant");
   const footersManager = getSectionManager(footers, "footerVariant");
 
   const headerCellManagers = columns
@@ -481,22 +480,108 @@ const ReusableTable = ({ data }) => {
         }
       } else if (col.action === "links") {
         const linkUrl = getNestedValue(row, col.key);
+        // Determine the configuration for the current actions column.
+        // First, determine the configuration to use:
+        const linksConfig = (() => {
+          let specificConfig = null;
+          // First condition: Check for config with key "linksColumn"
+          if (col.serial !== undefined && linksManager?.value) {
+            const linksColumnConfigs = linksManager.value.filter(
+              (cfg) => cfg.id === "linksColumn"
+            );
+            if (linksColumnConfigs?.length > 0) {
+              specificConfig = linksColumnConfigs.find((cfg) => {
+                if (cfg.serial !== undefined) {
+                  if (Array.isArray(cfg.serial)) {
+                    return cfg.serial.includes(col.serial);
+                  }
+                  return cfg.serial === col.serial;
+                }
+                return false;
+              });
+            }
+          }
+          // Third condition: If not found, fall back to the config with "linksVariant"
+          return (
+            specificConfig ||
+            linksManager?.value?.find((cfg) => cfg.id === "linksVariant") ||
+            {}
+          );
+        })();
+        // Extract relevant values
+        const {
+          dataInt,
+          dataRepeat,
+          dataCustom,
+          iconCustom,
+          iconInt,
+          iconRepeat,
+        } = linksConfig;
+        // Handle dynamic label
+        let dynamicLabel = "Visit"; // Default value
+        if (dataCustom && dataCustom[rowIndex] !== undefined) {
+          // If a specific placeholder is defined for this row, use it
+          dynamicLabel = dataCustom[rowIndex];
+        } else if (Array.isArray(dataInt)) {
+          if (dataRepeat) {
+            // Repeat `dataInt` cyclically using modulo (%) if dataRepeat is enabled
+            dynamicLabel = dataInt[rowIndex % dataInt.length];
+          } else {
+            // Standard case: Use index directly (only works within available length)
+            dynamicLabel = dataInt[rowIndex] || "Visit";
+          }
+        } else if (typeof dataInt === "string") {
+          // If `dataInt` is just a single string, use it directly
+          dynamicLabel = dataInt;
+        }
+        let dynamicIcon = "⮺";
+        if (iconCustom && iconCustom[rowIndex] !== undefined) {
+          // If a specific placeholder is defined for this row, use it
+          dynamicIcon = iconCustom[rowIndex];
+        } else if (Array.isArray(iconInt)) {
+          if (iconRepeat) {
+            // Repeat `dataInt` cyclically using modulo (%) if dataRepeat is enabled
+            dynamicIcon = iconInt[rowIndex % iconInt.length];
+          } else {
+            // Standard case: Use index directly (only works within available length)
+            dynamicIcon = iconInt[rowIndex] || "⮺";
+          }
+        } else if (typeof iconInt === "string") {
+          // If `dataInt` is just a single string, use it directly
+          dynamicIcon = iconInt;
+        }
         if (linkUrl) {
           return (
-            <button className={`w-[54px] text-cyan-500 hover:text-cyan-700`}>
+            <button
+              className={`${
+                linksConfig?.dataVariant
+                  ? linksConfig?.dataVariant
+                  : "min-w-[54px]"
+              } ${
+                linksConfig?.dataColor
+                  ? linksConfig?.dataColor
+                  : "text-cyan-500 hover:text-cyan-700"
+              }`}
+            >
               <a
                 title={linkUrl}
                 href={linkUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`text-nowrap flex flex-row items-center justify-center gap-[2px] hover:gap-[4px] group transition-all duration-100 ease-out hover:scale-110`}
+                className={`inline-block transform group transition-all duration-100 ease-out hover:scale-110`}
               >
                 <span
                   className={`relative z-10 underline group-hover:underline-offset-3 decoration-1 underline-offset-1 font-light transition-all duration-100 ease-out`}
                 >
-                  Visit
+                  {dynamicLabel}
                 </span>
-                <span className={`relative z-10 text-[16px]`}>⮺</span>
+                <span
+                  className={`relative z-10 text-[16px] ml-[2px] ${
+                    linksConfig?.iconVariant ? linksConfig?.iconVariant : ""
+                  }`}
+                >
+                  {dynamicIcon}
+                </span>
               </a>
             </button>
           );
