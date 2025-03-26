@@ -347,61 +347,81 @@ const ReusableTable = ({ data }) => {
     if (col.action === "checkMarks") {
       if (!currentRole.allowCheckbox) return "";
       return (
-        <input
-          type="checkbox"
-          className="w-4 h-4"
-          checked={allSelected}
-          onChange={(e) =>
-            e.target.checked
-              ? setSelectedRows([...tableRows])
-              : setSelectedRows([])
-          }
-        />
+        <div className=" relative flex items-center justify-center">
+          <input
+            type="checkbox"
+            className=" relative peer w-5 h-5 appearance-none border border-cyan-500 rounded-md checked:bg-cyan-500 checked:border-transparent bg-white"
+            checked={allSelected}
+            onChange={(e) =>
+              e.target.checked
+                ? setSelectedRows([...tableRows])
+                : setSelectedRows([])
+            }
+          />
+          <span className="absolute hidden peer-checked:block pointer-events-none text-white font-[900] text-[16px]">
+            &#10003;
+          </span>
+        </div>
       );
     }
     return cell.header || "";
   };
 
-  const renderBodyCellContent = (row, rowIndex, col) => {
+  const renderBodyCellContent = (row, rowIndex, col, colIndex) => {
+    // When col.action is defined, check each condition independently.
     if (col.action) {
-      if (col.action === "checkMarks") {
-        if (!currentRole.allowCheckbox) return null;
-        return (
-          <input
-            type="checkbox"
-            className="w-4 h-4"
-            checked={selectedRows.some(
-              (selected) =>
-                getRowId(selected, rowIndex) === getRowId(row, rowIndex)
-            )}
-            onChange={() => handleRowCheckboxChange(row, rowIndex)}
-          />
-        );
-      } else if (col.action === "badges") {
+      const components = [];
+      // CheckMarks condition
+      if (
+        (Array.isArray(col.action) && col.action.includes("checkMarks")) ||
+        col.action === "checkMarks"
+      ) {
+        if (currentRole.allowCheckbox) {
+          components.push(
+            <div
+              key={`checkMarks-${rowIndex}-${colIndex}`}
+              className=" relative flex items-center justify-center"
+            >
+              <input
+                type="checkbox"
+                className=" relative peer w-5 h-5 appearance-none border border-cyan-500 rounded-md checked:bg-cyan-500 checked:border-transparent bg-white"
+                checked={selectedRows.some(
+                  (selected) =>
+                    getRowId(selected, rowIndex) === getRowId(row, rowIndex)
+                )}
+                onChange={() => handleRowCheckboxChange(row, rowIndex)}
+              />
+              <span className="absolute hidden peer-checked:block pointer-events-none text-white font-[900] text-[16px]">
+                &#10003;
+              </span>
+            </div>
+          );
+        }
+      }
+      // Badges condition
+      if (
+        (Array.isArray(col.action) && col.action.includes("badges")) ||
+        col.action === "badges"
+      ) {
         const badgesManager = action?.flatMap((a) => a.badges || []);
-        if (col.action === "badges") {
-          const status = row.status; // e.g. "Alive", "Dead", or "unknown"
-          // Find the badge that defines the current status
-          const badgeForStatus = badgesManager.find((badge) => badge[status]);
-          // Get status-specific data if available
+        const status = getNestedValue(row, col.key); // e.g. "Alive", "Dead", or "unknown"
+        if (status) {
+          const badgeForStatus = badgesManager?.find((badge) => badge[status]);
           const statusData = badgeForStatus ? badgeForStatus[status] : null;
-
-          // Use status-specific variants if they exist; otherwise fallback to value-level or defaults.
           const dataVariant =
             statusData?.dataVariant ||
             badgeForStatus?.value?.dataVariant ||
-            "bg-cyan-600";
+            "bg-cyan-500";
           const dataTextVariant =
             statusData?.dataTextVariant ||
             badgeForStatus?.value?.dataTextVariant ||
             "text-white";
-          const commonStyles = badgeForStatus?.value || {};
+          const commonStyles =
+            badgesManager?.find((a) => a.key === "manager")?.value || {};
           const dataBorderVariant =
             statusData?.dataBorderVariant ||
-            commonStyles.dataBorderVariant ||
+            commonStyles?.dataBorderVariant ||
             "border-transparent";
-
-          // Calculate style values with fallback defaults
           const paddingY =
             (statusData?.dataSize?.y ?? commonStyles?.dataSize?.y ?? 6) + "px";
           const paddingX =
@@ -409,22 +429,18 @@ const ReusableTable = ({ data }) => {
           const fontSize =
             (statusData?.dataTextSize ?? commonStyles?.dataTextSize ?? 12) +
             "px";
-
           const dataFont = statusData?.dataFont ?? commonStyles?.dataFont;
           const fontWeight =
             typeof dataFont === "number" ? dataFont : dataFont || 600;
-
           const borderSize =
             statusData?.dataBorderSize ?? commonStyles?.dataBorderSize;
           const borderWidth =
             typeof borderSize === "number" ? `${borderSize}px` : borderSize;
-
           const dataRadius = statusData?.dataRadius ?? commonStyles?.dataRadius;
           const borderRadius =
             typeof dataRadius === "number"
               ? `${dataRadius}px`
               : dataRadius || "16px";
-
           const style = {
             padding: `${paddingY} ${paddingX}`,
             fontSize,
@@ -432,11 +448,13 @@ const ReusableTable = ({ data }) => {
             borderWidth,
             borderRadius,
           };
-
-          return (
+          components.push(
             <div
+              key={`badges-${rowIndex}-${colIndex}`}
               className={`
-                ${dataVariant} ${dataTextVariant} border ${dataBorderVariant}
+                ${dataVariant} ${dataTextVariant} ${
+                status && "border"
+              } ${dataBorderVariant}
                 hover:opacity-80 transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2
               `}
               style={style}
@@ -445,19 +463,26 @@ const ReusableTable = ({ data }) => {
             </div>
           );
         }
-      } else if (col.action === "photos") {
+      }
+      // Photos condition
+      if (
+        (Array.isArray(col.action) && col.action.includes("photos")) ||
+        col.action === "photos"
+      ) {
         const imageUrl = getNestedValue(row, col.key);
         if (imageUrl) {
-          return (
+          components.push(
             <div
+              key={`photos-${rowIndex}-${colIndex}`}
               style={{
                 width:
                   typeof photosManager?.dataSize?.x === "number"
-                    ? `${photosManager?.dataSize?.x || 64}px`
+                    ? `${photosManager.dataSize.x || 64}px`
                     : photosManager?.dataSize?.x || "100%",
                 height:
-                  typeof photosManager?.dataSize?.y === "number" &&
-                  `${photosManager?.dataSize?.y || 64}px`,
+                  typeof photosManager?.dataSize?.y === "number"
+                    ? `${photosManager.dataSize.y || 64}px`
+                    : photosManager?.dataSize?.y,
                 aspectRatio: photosManager?.dataRatio || "1 / 1",
                 overflow: "hidden",
                 borderRadius: photosManager?.dataRadius
@@ -478,13 +503,15 @@ const ReusableTable = ({ data }) => {
             </div>
           );
         }
-      } else if (col.action === "links") {
+      }
+      // Links condition
+      if (
+        (Array.isArray(col.action) && col.action.includes("links")) ||
+        col.action === "links"
+      ) {
         const linkUrl = getNestedValue(row, col.key);
-        // Determine the configuration for the current actions column.
-        // First, determine the configuration to use:
         const linksConfig = (() => {
           let specificConfig = null;
-          // First condition: Check for config with key "linksColumn"
           if (col.serial !== undefined && linksManager?.value) {
             const linksColumnConfigs = linksManager.value.filter(
               (cfg) => cfg.id === "linksColumn"
@@ -501,14 +528,12 @@ const ReusableTable = ({ data }) => {
               });
             }
           }
-          // Third condition: If not found, fall back to the config with "linksVariant"
           return (
             specificConfig ||
             linksManager?.value?.find((cfg) => cfg.id === "linksVariant") ||
             {}
           );
         })();
-        // Extract relevant values
         const {
           dataInt,
           dataRepeat,
@@ -517,49 +542,37 @@ const ReusableTable = ({ data }) => {
           iconInt,
           iconRepeat,
         } = linksConfig;
-        // Handle dynamic label
-        let dynamicLabel = "Visit"; // Default value
+        let dynamicLabel = "Visit";
         if (dataCustom && dataCustom[rowIndex] !== undefined) {
-          // If a specific placeholder is defined for this row, use it
           dynamicLabel = dataCustom[rowIndex];
         } else if (Array.isArray(dataInt)) {
-          if (dataRepeat) {
-            // Repeat `dataInt` cyclically using modulo (%) if dataRepeat is enabled
-            dynamicLabel = dataInt[rowIndex % dataInt.length];
-          } else {
-            // Standard case: Use index directly (only works within available length)
-            dynamicLabel = dataInt[rowIndex] || "Visit";
-          }
+          dynamicLabel = dataRepeat
+            ? dataInt[rowIndex % dataInt.length]
+            : dataInt[rowIndex] || "Visit";
         } else if (typeof dataInt === "string") {
-          // If `dataInt` is just a single string, use it directly
           dynamicLabel = dataInt;
         }
         let dynamicIcon = "⮺";
         if (iconCustom && iconCustom[rowIndex] !== undefined) {
-          // If a specific placeholder is defined for this row, use it
           dynamicIcon = iconCustom[rowIndex];
         } else if (Array.isArray(iconInt)) {
-          if (iconRepeat) {
-            // Repeat `dataInt` cyclically using modulo (%) if dataRepeat is enabled
-            dynamicIcon = iconInt[rowIndex % iconInt.length];
-          } else {
-            // Standard case: Use index directly (only works within available length)
-            dynamicIcon = iconInt[rowIndex] || "⮺";
-          }
+          dynamicIcon = iconRepeat
+            ? iconInt[rowIndex % iconInt.length]
+            : iconInt[rowIndex] || "⮺";
         } else if (typeof iconInt === "string") {
-          // If `dataInt` is just a single string, use it directly
           dynamicIcon = iconInt;
         }
         if (linkUrl) {
-          return (
+          components.push(
             <button
+              key={`links-${rowIndex}-${colIndex}`}
               className={`${
                 linksConfig?.dataVariant
-                  ? linksConfig?.dataVariant
+                  ? linksConfig.dataVariant
                   : "min-w-[54px]"
               } ${
                 linksConfig?.dataColor
-                  ? linksConfig?.dataColor
+                  ? linksConfig.dataColor
                   : "text-cyan-500 hover:text-cyan-700"
               }`}
             >
@@ -568,16 +581,14 @@ const ReusableTable = ({ data }) => {
                 href={linkUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`inline-block transform group transition-all duration-100 ease-out hover:scale-110`}
+                className="inline-block transform group transition-all duration-100 ease-out hover:scale-110"
               >
-                <span
-                  className={`relative z-10 underline group-hover:underline-offset-3 decoration-1 underline-offset-1 font-light transition-all duration-100 ease-out`}
-                >
+                <span className="relative z-10 underline group-hover:underline-offset-3 decoration-1 underline-offset-1 font-light transition-all duration-100 ease-out">
                   {dynamicLabel}
                 </span>
                 <span
                   className={`relative z-10 text-[16px] ml-[2px] ${
-                    linksConfig?.iconVariant ? linksConfig?.iconVariant : ""
+                    linksConfig?.iconVariant ? linksConfig.iconVariant : ""
                   }`}
                 >
                   {dynamicIcon}
@@ -586,82 +597,83 @@ const ReusableTable = ({ data }) => {
             </button>
           );
         }
-      } else if (col.action === "actions") {
-        if (!currentRole.allowActions) return null;
-        let filteredActions = actionsData;
-        if (Array.isArray(currentRole.allowActions)) {
-          filteredActions = actionsData?.filter(
-            (action) =>
-              action.label && currentRole.allowActions.includes(action.label)
-          );
-        }
-        // Filter actions based on the column's serial (supports single number or array)
-        if (col.serial !== undefined) {
-          filteredActions = filteredActions.filter((action) => {
-            if (action.serial !== undefined) {
-              if (Array.isArray(action.serial)) {
-                return action.serial.includes(col.serial);
-              }
-              return action.serial === col.serial;
-            }
-            // Optionally, exclude actions without a defined serial when a column serial is set
-            return false;
-          });
-        }
-
-        // Determine the configuration for the current actions column.
-        // Priority: "actionsColumn" with matching serial (or array of serials) > fallback to "actionsVariant".
-        const columnConfig = (() => {
-          let specificConfig = null;
-          if (col.serial !== undefined && actionsManager?.value) {
-            const actionColumnConfigs = actionsManager.value.filter(
-              (cfg) => cfg.id === "actionsColumn"
+      }
+      // Actions condition
+      if (
+        (Array.isArray(col.action) && col.action.includes("actions")) ||
+        col.action === "actions"
+      ) {
+        if (currentRole.allowActions) {
+          let filteredActions = actionsData;
+          if (Array.isArray(currentRole.allowActions)) {
+            filteredActions = actionsData?.filter(
+              (action) =>
+                action.label && currentRole.allowActions.includes(action.label)
             );
-            if (actionColumnConfigs && actionColumnConfigs.length > 0) {
-              specificConfig = actionColumnConfigs.find((cfg) => {
-                if (cfg.serial !== undefined) {
-                  if (Array.isArray(cfg.serial)) {
-                    return cfg.serial.includes(col.serial);
-                  }
-                  return cfg.serial === col.serial;
-                }
-                return false;
-              });
-            }
           }
-          return (
-            specificConfig ||
-            actionsManager?.value?.find((cfg) => cfg.id === "actionsVariant") ||
-            {}
-          );
-        })();
-
-        return (
-          <div
-            className={`grid ${
-              columnConfig?.dataPosition || "items-center justify-center"
-            } ${
-              columnConfig?.actionsFlexType === "horizontal"
-                ? "grid-flow-col"
-                : "grid-flow-row"
-            }`}
-            style={{
-              gap:
-                filteredActions?.length > 1 &&
-                `${columnConfig?.actionsBetween || 8}px`,
-              ...(columnConfig?.actionsFlexType === "horizontal"
-                ? { gridTemplateRows: "repeat(1, auto)" }
-                : {
-                    gridTemplateColumns: `repeat(${
-                      Number(columnConfig?.verticalColumns) || 2
-                    }, auto)`,
-                  }),
-            }}
-          >
-            {filteredActions?.map((action, actionIndex) => {
-              return (
+          if (col.serial !== undefined) {
+            filteredActions = filteredActions.filter((action) => {
+              if (action.serial !== undefined) {
+                if (Array.isArray(action.serial)) {
+                  return action.serial.includes(col.serial);
+                }
+                return action.serial === col.serial;
+              }
+              return false;
+            });
+          }
+          const columnConfig = (() => {
+            let specificConfig = null;
+            if (col.serial !== undefined && actionsManager?.value) {
+              const actionColumnConfigs = actionsManager.value.filter(
+                (cfg) => cfg.id === "actionsColumn"
+              );
+              if (actionColumnConfigs?.length > 0) {
+                specificConfig = actionColumnConfigs.find((cfg) => {
+                  if (cfg.serial !== undefined) {
+                    if (Array.isArray(cfg.serial)) {
+                      return cfg.serial.includes(col.serial);
+                    }
+                    return cfg.serial === col.serial;
+                  }
+                  return false;
+                });
+              }
+            }
+            return (
+              specificConfig ||
+              actionsManager?.value?.find(
+                (cfg) => cfg.id === "actionsVariant"
+              ) ||
+              {}
+            );
+          })();
+          components.push(
+            <div
+              key={`actions-${rowIndex}-${colIndex}`}
+              className={`grid ${
+                columnConfig?.dataPosition || "items-center justify-center"
+              } ${
+                columnConfig?.actionsFlexType === "horizontal"
+                  ? "grid-flow-col"
+                  : "grid-flow-row"
+              }`}
+              style={{
+                gap:
+                  filteredActions?.length > 1 &&
+                  `${columnConfig?.actionsBetween || 8}px`,
+                ...(columnConfig?.actionsFlexType === "horizontal"
+                  ? { gridTemplateRows: "repeat(1, auto)" }
+                  : {
+                      gridTemplateColumns: `repeat(${
+                        Number(columnConfig?.verticalColumns) || 2
+                      }, auto)`,
+                    }),
+              }}
+            >
+              {filteredActions?.map((action, actionIndex) => (
                 <button
-                  key={actionIndex}
+                  key={`action-${actionIndex}`}
                   onClick={() => {
                     if (
                       typeof action.onClick === "function" &&
@@ -686,26 +698,31 @@ const ReusableTable = ({ data }) => {
                   }`}
                   style={{
                     gap: `${action.gapBetween || 4}px`,
-                    gridColumnStart: action?.colStart || "auto", // Set start position
+                    gridColumnStart: action?.colStart || "auto",
                     gridColumnEnd: action?.colSpan
                       ? `span ${action.colSpan}`
-                      : "span 1", // Set span
+                      : "span 1",
                   }}
                 >
                   {action.icon && (
-                    <span className={`${action.iconVariant}`}>
-                      {action.icon}
-                    </span>
+                    <span className={action.iconVariant}>{action.icon}</span>
                   )}
                   <span>{action.label}</span>
                 </button>
-              );
-            })}
-          </div>
-        );
+              ))}
+            </div>
+          );
+        }
       }
-
-      return "";
+      // If nothing has been added, fall back to a simple value.
+      if (components.length === 0) {
+        let value = getNestedValue(row, col.key);
+        if (!isNaN(value) && value !== "" && value !== null) {
+          value = Number(value).toLocaleString();
+        }
+        return value;
+      }
+      return <>{components}</>;
     } else {
       let value = getNestedValue(row, col.key);
       if (!isNaN(value) && value !== "" && value !== null) {

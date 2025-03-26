@@ -8,7 +8,7 @@ const TestThree = () => {
       value: [
         [
           { header: true, key: "checkBox", action: "checkMarks" },
-          { header: "ID", key: "id", icon: "#" },
+          { header: "ID", key: "id" },
           { header: "Name", key: "name" },
           { header: "Visual", key: "image", action: "photos" },
           { header: "Status", key: "status", action: "badges" },
@@ -20,7 +20,7 @@ const TestThree = () => {
           { header: "Origin", key: "origin.name" },
           { header: "Origin", key: "origin.url", action: "links" },
           { header: "Link", key: "url", action: "links" },
-          { header: "Created", key: "created" },
+          { header: "Created Date", key: "created" },
           {
             header: "Management",
             key: "buttonOne",
@@ -107,21 +107,6 @@ const TestThree = () => {
   ];
 
   const action = [
-    {
-      links: [
-        {
-          key: "manager",
-          value: [
-            {
-              id: "linksVariant",
-              dataColor: "",
-              dataVariant: "",
-              dataInt: "",
-            },
-          ],
-        },
-      ],
-    },
     {
       actions: [
         {
